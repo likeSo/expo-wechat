@@ -1,5 +1,5 @@
 {
-  "name": "expo-wechat-sdk",
+  "name": "expo-wechat-sdk-no-pay",
   "version": "0.1.0",
   "description": "React Native expo package for Wechat Open SDK.",
   "main": "build/index.js",

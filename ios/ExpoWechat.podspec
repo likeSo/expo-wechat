@@ -20,10 +20,9 @@ Pod::Spec.new do |s|
 
   s.dependency 'ExpoModulesCore'
 
-  s.dependency 'WXLibSwift'
+  # s.dependency 'WXLibSwift'
   
-  # TODO: 无支付的包
-#  s.dependency 'WXLibSwift/NoPay'
+ s.dependency 'WXLibSwift/NoPay'
   
   # Swift/Objective-C compatibility
   s.pod_target_xcconfig = {

@@ -402,27 +402,6 @@ public class ExpoWechatModule: Module {
                 promise.reject(apiNotRegisteredException)
             }
         }
-        
-        AsyncFunction("pay") { (options: WeChatPayOptions, promise: Promise) in
-            if (isApiRegistered) {
-                let req = PayReq()
-                
-                req.partnerId = options.partnerId
-                req.prepayId = options.prepayId
-                req.nonceStr = options.nonceStr
-                req.timeStamp = options.timeStamp
-                req.sign = options.sign
-                req.package = options.package
-                //                        req.extData = options.extraData
-                
-                WXApi.send(req) { succeed in
-                    promise.resolve(succeed)
-                }
-            } else {
-                promise.reject(apiNotRegisteredException)
-            }
-        }
-        
     }
 }
 

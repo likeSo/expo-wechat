@@ -70,7 +70,7 @@ PODS:
     - Yoga
   - ExpoWechat (0.1.0):
     - ExpoModulesCore
-    - WXLibSwift
+    - WXLibSwift/NoPay
   - fast_float (6.1.4)
   - FBLazyVector (0.79.2)
   - fmt (11.0.2)
@@ -1725,10 +1725,8 @@ PODS:
     - React-perflogger (= 0.79.2)
     - React-utils (= 0.79.2)
   - SocketRocket (0.7.1)
-  - WXLibSwift (0.1.3):
-    - WXLibSwift/Pay (= 0.1.3)
   - WXLibSwift/Core (0.1.3)
-  - WXLibSwift/Pay (0.1.3):
+  - WXLibSwift/NoPay (0.1.3):
     - WXLibSwift/Core
   - Yoga (0.0.0)
 
@@ -1996,7 +1994,7 @@ SPEC CHECKSUMS:
   ExpoImagePicker: 0963da31800c906e01c03e25d7c849f16ebf02a2
   ExpoKeepAwake: bf0811570c8da182bfb879169437d4de298376e7
   ExpoModulesCore: 5d37821c36f3781dcd0ea9a393800c90eaa6259d
-  ExpoWechat: 84b32d19a7019493a5d9c1050023f867c6a3a381
+  ExpoWechat: ca78d8af68b7cadb821a4c5de9fb4934b1828637
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
   FBLazyVector: 84b955f7b4da8b895faf5946f73748267347c975
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd

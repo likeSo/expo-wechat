@@ -493,26 +493,6 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
                 promise.reject(apiNotRegisteredException)
             }
         }
-
-        AsyncFunction("pay") { options: WeChatPayOptions, promise: Promise ->
-            if (api != null) {
-                val req = PayReq()
-                req.appId = wxAppId
-                req.partnerId = options.partnerId
-                req.prepayId = options.prepayId
-                req.nonceStr = options.nonceStr
-                req.timeStamp = options.timeStamp
-                req.sign = options.sign
-                req.packageValue = options.`package`
-                req.extData = options.extraData
-
-                api?.sendReq(req) { p0 ->
-                    promise.resolve(p0)
-                }
-            } else {
-                promise.reject(apiNotRegisteredException)
-            }
-        }
     }
 
     fun handleIntent(intent: Intent) {
