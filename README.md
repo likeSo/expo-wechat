@@ -4,11 +4,11 @@
 React Native Expo版本的微信SDK。
 本框架旨在让你所有原生代码配置都在RN侧以及json文件中进行，真正做到0原生代码配置，充分利用expo的优势来做到简单好用。
 
-⚠️项目测试中，敬请期待⚠️
+⚠️此项目尚处于Beta状态，还未经过充分的测试，但作者积极维护，如有任何问题，都可以issue或者加群提问。⚠️
 
 # 安装
 ```shell
-npx expo install expo-wechat-sdk
+npx expo install expo-wechat
 
 # 不带支付版本
 # npx expo install expo-wechat-no-pay
@@ -72,6 +72,8 @@ URL Scheme白名单，也就是`LSApplicationQueriesSchemes`字段，因为是�
 ]
 ```
 这些是全部的配置项了，都可以通过expo的`app.json`来完成，配置部分完成后，就可以正常使用微信SDK了。
+
+请注意，由于包含了自定义的原生代码，无法在expo go中直接使用。你应该使用`npx expo run:android`或者`npx expo run:ios`，编译原生app。详情参见官方[DevClient文档](https://docs.expo.dev/versions/latest/sdk/dev-client/)。
 
 # 使用
 
