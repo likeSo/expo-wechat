@@ -1,5 +1,5 @@
 # expo-wechat
-![npm](https://img.shields.io/npm/v/expo-wechat-sdk.svg)
+![npm](https://img.shields.io/npm/v/expo-wechat-no-pay.svg)
 
 React Native Expo版本的微信SDK。
 本框架旨在让你所有原生代码配置都在RN侧以及json文件中进行，真正做到0原生代码配置，充分利用expo的优势来做到简单好用。
@@ -11,7 +11,7 @@ React Native Expo版本的微信SDK。
 npx expo install expo-wechat-sdk
 
 # 不带支付版本
-# npx expo install expo-wechat-sdk-no-pay
+# npx expo install expo-wechat-no-pay
 ```
 
 # 配置
