@@ -1,6 +1,6 @@
 {
   "name": "expo-wechat-no-pay",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "React Native expo package for Wechat Open SDK.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
