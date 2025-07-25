@@ -1,6 +1,6 @@
 {
-  "name": "expo-wechat-sdk-no-pay",
-  "version": "0.1.0",
+  "name": "expo-wechat-no-pay",
+  "version": "0.1.1",
   "description": "React Native expo package for Wechat Open SDK.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -20,7 +20,6 @@
     "expo",
     "wechat",
     "expo-wechat",
-    "expo-wechat-sdk",
     "ExpoWechat"
   ],
   "repository": "https://github.com/likeSo/expo-wechat",
