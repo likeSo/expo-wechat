@@ -11,6 +11,7 @@ import {
   ShareMiniProgramOptions,
   LaunchMiniProgramOptions,
   LogLevel,
+  WeChatPayOptions,
 } from "./ExpoWechat.types";
 
 declare class ExpoWechatModule extends NativeModule<ExpoWechatModuleEvents> {
@@ -52,8 +53,7 @@ declare class ExpoWechatModule extends NativeModule<ExpoWechatModuleEvents> {
 
   /**
    * 发送微信扫码登录请求。返回微信登录二维码。
-   * @param appId 微信App ID
-   * @param appSecret 微信App Secret
+   * @param options 微信扫码登录参数。
    */
   sendAuthByQRRequest(options: AuthByQROptions): Promise<string>;
 
@@ -119,6 +119,11 @@ declare class ExpoWechatModule extends NativeModule<ExpoWechatModuleEvents> {
     templateId: string,
     reserved: string
   ): Promise<boolean>;
+
+  /**
+   * 微信支付
+   */
+  pay(options: WeChatPayOptions): Promise<boolean>;
 }
 
 export default requireNativeModule<ExpoWechatModule>("ExpoWechat");

@@ -25,7 +25,7 @@ export type QRCodeAuthResultPayload = {
    * 授权登录结果。
    */
   authCode: string;
-}
+};
 
 /**
  * 从微信打开应用时的消息。
@@ -98,7 +98,7 @@ export type CommonResultPayload = {
   errorMessage: string;
   openId: string;
   transaction: string;
-}
+};
 
 export enum ResultErrorCode {
   ok = 0,
@@ -112,7 +112,7 @@ export enum ResultErrorCode {
 
 /**
  * 微信授权登录结果。
- * 
+ *
  */
 export type AuthResultPayload = {
   code: string;
@@ -121,7 +121,7 @@ export type AuthResultPayload = {
   authResult: boolean;
   lang: string;
   country: string;
-} & CommonResultPayload
+} & CommonResultPayload;
 
 /**
  * 微信支付结果。
@@ -130,7 +130,7 @@ export type PayResultPayload = {
   prepayId?: string;
   returnKey?: string;
   extraInfo?: string;
-} & CommonResultPayload
+} & CommonResultPayload;
 
 export type LaunchMiniProgramResultPayload = {
   extraInfo?: string;
@@ -145,10 +145,10 @@ export type ShareScene = 'session' | 'timeline' | 'favorite' | 'status' | 'speci
  * 微信扫码登录所需参数。
  */
 export type AuthByQROptions = {
-  appId: string,
-  appSecret: string,
-  scope: "snsapi_userinfo" | Omit<string, "snsapi_userinfo">,
-  schemeData?: string
+  appId: string;
+  appSecret: string;
+  scope: "snsapi_userinfo" | Omit<string, "snsapi_userinfo">;
+  schemeData?: string;
 }
 
 /**
@@ -164,9 +164,9 @@ export type ShareImageOptions = {
   base64OrImageUri: string
   scene: ShareScene
   thumbBase64OrImageUri?: string;
-  imageDataHash?: string | null
-  miniProgramId?: string | null
-  miniProgramPath?: string | null
+  imageDataHash?: string | null;
+  miniProgramId?: string | null;
+  miniProgramPath?: string | null;
 }
 
 /**
@@ -187,13 +187,13 @@ export type ShareImageOptions = {
  * @param description 歌曲描述，建议跟singerName保持一致。
  * @param extraMessage 额外信息字段，当微信跳回软件的时候会带上这个字段。
  * @param thumbBase64OrImageUri 缩略图内容，可以是本地图片URI，或者base64编码的图片数据。不得超过64kb。如果超过64kb，会被自动压缩。
- */ 
+ */
 export type ShareMusicOptions = {
   musicWebpageUrl: string
   musicFileUri: string
   singerName: string
   duration: number
-  scene: ShareScene
+  scene: ShareScene;
   songLyric?: string;
   hdAlbumThumbFilePath?: string;
   hdAlbumThumbFileHash?: string;
@@ -217,8 +217,8 @@ export type ShareMusicOptions = {
  * @param description 视频描述。
  */
 export type ShareVideoOptions = {
-  videoUri: string
-  scene: ShareScene
+  videoUri: string;
+  scene: ShareScene;
   lowQualityVideoUri?: string;
   thumbBase64OrImageUri?: string;
   title?: string;
@@ -236,14 +236,14 @@ export type ShareVideoOptions = {
  * @param thumbBase64OrImageUri 缩略图内容，可以是本地图片URI，或者base64编码的图片数据。
  */
 export type ShareWebpageOptions = {
-  url: string
-  scene: ShareScene
-  extraInfo?: string
-  canvasPageXml?: string
-  title?: string
-  description?: string
+  url: string;
+  scene: ShareScene;
+  extraInfo?: string;
+  canvasPageXml?: string;
+  title?: string;
+  description?: string;
   thumbBase64OrImageUri?: string;
-}
+};
 
 /**
  * 微信小程序类型。
@@ -263,19 +263,19 @@ export type WeChatMiniProgramType = 'release' | 'test' | 'preview'
  */
 
 export type ShareMiniProgramOptions = {
-  webpageUrl?: string
+  webpageUrl?: string;
   id: string;
-  type: WeChatMiniProgramType
+  type: WeChatMiniProgramType;
   path?: string;
-  scene: ShareScene
+  scene: ShareScene;
   withShareTicket?: boolean;
-  title?: string
-  description?: string
+  title?: string;
+  description?: string;
   thumbBase64OrImageUri?: string;
   disableForward?: boolean;
   isUpdatableMessage?: boolean;
   isSecretMessage?: boolean;
-}
+};
 
 /**
  * 启动微信小程序所需的参数。
@@ -286,10 +286,10 @@ export type ShareMiniProgramOptions = {
  */
 export type LaunchMiniProgramOptions = {
   id: string;
-  type: WeChatMiniProgramType
+  type: WeChatMiniProgramType;
   path?: string;
   extraData?: string;
-}
+};
 
 /**
  * 微信支付所需的参数。
@@ -302,13 +302,13 @@ export type LaunchMiniProgramOptions = {
  * @param extraData 额外数据。
  */
 export type WeChatPayOptions = {
-  partnerId: string
-  prepayId: string
-  nonceStr: string
-  timeStamp: string
-  sign: string
-  package: string
-  extraData: string
+  partnerId: string;
+  prepayId: string;
+  nonceStr: string;
+  timeStamp: string;
+  sign: string;
+  package: string;
+  extraData: string;
 }
 
 /**
