@@ -7,6 +7,7 @@
 
 import Foundation
 import ExpoModulesCore
+import WXLibSwift
 
 
 /**
@@ -230,4 +231,39 @@ struct WeChatPayOptions : Record {
 
     @Field
     var extraData: String = ""
+}
+
+
+enum LogLevel: String, Comparable {
+    case verbose
+    case debug
+    case info
+    case warning
+    case error
+    
+    var weight: Int {
+        switch self {
+        case .verbose: return 0
+        case .debug:   return 1
+        case .info:    return 2
+        case .warning: return 3
+        case .error:   return 4
+        }
+    }
+    
+    var wxLogLevel: WXLogLevel {
+        switch self {
+        case .verbose, .debug, .info:
+            return WXLogLevel.detail
+        default: return WXLogLevel.normal
+        }
+    }
+    
+    static func < (lhs: LogLevel, rhs: LogLevel) -> Bool {
+        return lhs.weight < rhs.weight
+    }
+    
+    static func <= (lhs: LogLevel, rhs: LogLevel) -> Bool {
+        return lhs.weight <= rhs.weight
+    }
 }

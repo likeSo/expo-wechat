@@ -1,6 +1,6 @@
 import { registerWebModule, NativeModule } from "expo";
 
-import { ExpoWechatModuleEvents } from "./ExpoWechat.types";
+import { ExpoWechatModuleEvents, LogLevel } from "./ExpoWechat.types";
 
 const WEB_NOT_SUPPORTED_MESSAGE = "ExpoWeChat is not supported on web";
 
@@ -28,6 +28,11 @@ class ExpoWechatModule extends NativeModule<ExpoWechatModuleEvents> {
   registerApp(appId: string, universalLink: string) {
     console.log(WEB_NOT_SUPPORTED_MESSAGE);
     return Promise.resolve(false);
+  }
+
+  startLogByLevel(level: LogLevel) {
+    console.log(WEB_NOT_SUPPORTED_MESSAGE);
+    return Promise.resolve();
   }
 
   checkUniversalLinkReady() {

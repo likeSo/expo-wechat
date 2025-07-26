@@ -7,21 +7,13 @@ public class ExpoWechatModule: Module {
     
     static weak var moduleInstance: ExpoWechatModule?
     private var isApiRegistered = false
+    private var logLevel: LogLevel?
     private var authSDK: WechatAuthSDK?
     private var authSDKDelegateProxy: WeChatAuthSDKDelegateProxy?
-    // Each module class must implement the definition function. The definition consists of components
-    // that describes the module's functionality and behavior.
-    // See https://docs.expo.dev/modules/module-api for more details about available components.
+    
     public func definition() -> ModuleDefinition {
-        // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-        // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-        // The module will be accessible from `requireNativeModule('ExpoWechat')` in JavaScript.
+
         Name("ExpoWechat")
-        
-        // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
-        Constants([
-            "PI": Double.pi
-        ])
         
         Events(
             "onQRCodeAuthGotQRCode",
@@ -43,7 +35,6 @@ public class ExpoWechatModule: Module {
         }
         
         AsyncFunction("isWXAppInstalled") {
-            
             return WXApi.isWXAppInstalled()
         }
         
@@ -61,6 +52,16 @@ public class ExpoWechatModule: Module {
         
         AsyncFunction("registerApp") { (appId: String, universalLink: String) in
             return WXApi.registerApp(appId, universalLink: universalLink)
+        }
+        
+        AsyncFunction("startLogByLevel") { (logLevel: String) in
+            let logLevelEnum = LogLevel(rawValue: logLevel)
+            if let `enum` = logLevelEnum {
+                self.logLevel = `enum`
+                WXApi.startLog(by: `enum`.wxLogLevel) { logInfo in
+                    print("ExpoWeChatModule：\(logInfo)")
+                }
+            }
         }
         
         AsyncFunction("checkUniversalLinkReady") { (promise: Promise) in
@@ -88,7 +89,6 @@ public class ExpoWechatModule: Module {
         AsyncFunction("sendAuthByQRRequest") { (options: AuthByQROptions,
                                                 promise: Promise) in
             if isApiRegistered {
-                
                 WeChatSDKUtils.getAccessToken(weiXinId: options.appId,
                                               weiXinSecret: options.appSecret) { [weak self] accessToken in
                     if accessToken != nil {
@@ -127,7 +127,6 @@ public class ExpoWechatModule: Module {
         
         AsyncFunction("shareText") { (text: String, scene: String, promise: Promise) in
             if isApiRegistered {
-                
                 let req = SendMessageToWXReq()
                 req.text = text
                 req.bText = true
@@ -143,7 +142,6 @@ public class ExpoWechatModule: Module {
         
         AsyncFunction("shareImage") { (options: ShareImageOptions, promise: Promise) in
             if isApiRegistered {
-                
                 if let imageData = WeChatSDKUtils.getImageDataFromBase64OrUri(options.base64OrImageUri) {
                     
                     let imageObject = WXImageObject()
@@ -163,7 +161,6 @@ public class ExpoWechatModule: Module {
                     
                     let req = SendMessageToWXReq()
                     req.bText = false
-                    
                     
                     req.scene = WeChatSDKUtils.getWeChatShareScene(options.scene)
                     

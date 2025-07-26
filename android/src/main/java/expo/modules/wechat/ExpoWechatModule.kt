@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
+import android.util.Log
 import androidx.core.content.FileProvider
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.diffdev.DiffDevOAuthFactory
@@ -33,6 +34,7 @@ import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import com.tencent.mm.opensdk.openapi.SendReqCallback
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
+import com.tencent.mm.opensdk.utils.ILog
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.exception.CodedException
 import expo.modules.kotlin.functions.Coroutine
@@ -48,6 +50,7 @@ val apiNotRegisteredException =
         "Please call registerApp to initialize WX api first! ",
         null
     )
+val LOG_TAG = "ExpoWeChatModule"
 
 class ExpoWechatModule : Module(), IWXAPIEventHandler {
 
@@ -61,6 +64,7 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
 
     var api: IWXAPI? = null;
     var wxAppId: String? = null;
+    var logLevel: LogLevel? = null
 
     // Each module class must implement the definition function. The definition consists of components
     // that describes the module's functionality and behavior.
@@ -111,6 +115,41 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
             return@AsyncFunction null
         }
 
+        AsyncFunction("startLogByLevel") { level: String ->
+            logLevel = LogLevel.fromString(level)
+            api?.setLogImpl(object : ILog {
+                override fun v(p0: String?, p1: String?) {
+                    if (logLevel!!.weight <= LogLevel.VERBOSE.weight) {
+                        Log.v(p0 ?: LOG_TAG, p1 ?: "")
+                    }
+                }
+
+                override fun d(p0: String?, p1: String?) {
+                    if (logLevel!!.weight <= LogLevel.DEBUG.weight) {
+                        Log.d(p0 ?: LOG_TAG, p1 ?: "")
+                    }
+                }
+
+                override fun i(p0: String?, p1: String?) {
+                    if (logLevel!!.weight <= LogLevel.INFO.weight) {
+                        Log.i(p0 ?: LOG_TAG, p1 ?: "")
+                    }
+                }
+
+                override fun w(p0: String?, p1: String?) {
+                    if (logLevel!!.weight <= LogLevel.WARNING.weight) {
+                        Log.w(p0 ?: LOG_TAG, p1 ?: "")
+                    }
+                }
+
+                override fun e(p0: String?, p1: String?) {
+                    if (logLevel!!.weight <= LogLevel.ERROR.weight) {
+                        Log.e(p0 ?: LOG_TAG, p1 ?: "")
+                    }
+                }
+            })
+        }
+
         AsyncFunction("checkUniversalLinkReady") {
             return@AsyncFunction true
         }
@@ -154,7 +193,12 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
                         val nonceString = WeChatSDKUtils.generateObjectId()
                         val timestamp = System.currentTimeMillis().toString()
                         val signature =
-                            WeChatSDKUtils.createSignature(options.appId, nonceString, ticket, timestamp)
+                            WeChatSDKUtils.createSignature(
+                                options.appId,
+                                nonceString,
+                                ticket,
+                                timestamp
+                            )
                         val oauth = DiffDevOAuthFactory.getDiffDevOAuth();
                         val result = oauth.auth(
                             options.appId, options.scope, nonceString, timestamp, signature,

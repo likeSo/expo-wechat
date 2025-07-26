@@ -310,3 +310,8 @@ export type WeChatPayOptions = {
   package: string
   extraData: string
 }
+
+/**
+ * 微信日志等级。权重从高到低。
+ */
+export type LogLevel = 'verbose' | 'debug' | 'info' | 'warning' | 'error'

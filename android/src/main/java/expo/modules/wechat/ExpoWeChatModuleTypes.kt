@@ -225,3 +225,23 @@ class WeChatPayOptions : Record {
     @Field
     var extraData: String = ""
 }
+
+enum class LogLevel(val weight: Int) {
+    VERBOSE(0),
+    DEBUG(1),
+    INFO(2),
+    WARNING(3),
+    ERROR(4);
+
+    companion object {
+        fun fromString(level: String): LogLevel {
+            return when (level.lowercase()) {
+                "verbose" -> VERBOSE
+                "debug" -> DEBUG
+                "info" -> INFO
+                "warning" -> WARNING
+                else -> ERROR
+            }
+        }
+    }
+}

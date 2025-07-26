@@ -10,16 +10,17 @@ import {
   ShareWebpageOptions,
   ShareMiniProgramOptions,
   LaunchMiniProgramOptions,
+  LogLevel,
 } from "./ExpoWechat.types";
 
 declare class ExpoWechatModule extends NativeModule<ExpoWechatModuleEvents> {
   isWXAppInstalled(): Promise<boolean>;
   getApiVersion(): Promise<string>;
   getWXAppInstallUrl(): Promise<string | null>;
-    /**
+  /**
    * 打开微信App。返回打开结果。
    */
-    openWXApp(): Promise<boolean>;
+  openWXApp(): Promise<boolean>;
 
   /**
    * 初始化微信SDK。返回初始化结果。
@@ -27,6 +28,12 @@ declare class ExpoWechatModule extends NativeModule<ExpoWechatModuleEvents> {
    * @param universalLink 通用链接地址
    */
   registerApp(appId: string, universalLink: string): Promise<boolean>;
+
+  /**
+   * 启动微信日志。尽量只在调试时使用，上线后不用调用这个方法。
+   * @param level 日志等级。
+   */
+  startLogByLevel(level: LogLevel): Promise<void>
 
   /**
    * 启动微信自检流程，打印自检日志。iOS Only
@@ -48,9 +55,7 @@ declare class ExpoWechatModule extends NativeModule<ExpoWechatModuleEvents> {
    * @param appId 微信App ID
    * @param appSecret 微信App Secret
    */
-  sendAuthByQRRequest(
-    options: AuthByQROptions
-  ): Promise<string>;
+  sendAuthByQRRequest(options: AuthByQROptions): Promise<string>;
 
   /**
    * 分享文字到微信。返回分享结果。
@@ -114,7 +119,6 @@ declare class ExpoWechatModule extends NativeModule<ExpoWechatModuleEvents> {
     templateId: string,
     reserved: string
   ): Promise<boolean>;
-
 }
 
 export default requireNativeModule<ExpoWechatModule>("ExpoWechat");
