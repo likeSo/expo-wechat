@@ -119,11 +119,6 @@ declare class ExpoWechatModule extends NativeModule<ExpoWechatModuleEvents> {
     templateId: string,
     reserved: string
   ): Promise<boolean>;
-
-  /**
-   * 微信支付
-   */
-  pay(options: WeChatPayOptions): Promise<boolean>;
 }
 
 export default requireNativeModule<ExpoWechatModule>("ExpoWechat");
