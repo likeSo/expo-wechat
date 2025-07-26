@@ -60,6 +60,7 @@ const withExpoWechat: ConfigPlugin = (config) => {
       "weixinURLParamsAPI",
       "weixinQRCodePayAPI"
     );
+    queriesSchemes = [...new Set(queriesSchemes)];
     config.modResults.LSApplicationQueriesSchemes = queriesSchemes;
     return config;
   });
