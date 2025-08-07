@@ -11,7 +11,6 @@ import {
   ShareMiniProgramOptions,
   LaunchMiniProgramOptions,
   LogLevel,
-  WeChatPayOptions,
 } from "./ExpoWechat.types";
 
 declare class ExpoWechatModule extends NativeModule<ExpoWechatModuleEvents> {
