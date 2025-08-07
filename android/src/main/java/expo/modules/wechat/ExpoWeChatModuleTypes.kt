@@ -214,7 +214,7 @@ class WeChatPayOptions : Record {
     var nonceStr: String = ""
 
     @Field
-    var timeStamp: String = ""
+    var timeStamp: Int = 0
 
     @Field
     var sign: String = ""

@@ -177,7 +177,8 @@ export type ShareImageOptions = {
  * @param duration 音乐时长，单位为秒。
  * @param scene 分享目标场景。
  * @param songLyric 歌曲歌词。
- * @param hdAlbumThumbFilePath 高清专辑缩略图文件路径。
+ * @param hdAlbumThumbFilePath 安卓Only，高清专辑缩略图文件路径。
+ * @param hdAlbumThumbBase64OrImageUri iOS Only，高清专辑缩略图内容，可以是本地图片URI，或者base64编码的图片数据。
  * @param hdAlbumThumbFileHash 高清专辑缩略图文件哈希值。
  * @param albumName 专辑名称。
  * @param musicGenre 音乐风格。
@@ -196,6 +197,7 @@ export type ShareMusicOptions = {
   scene: ShareScene;
   songLyric?: string;
   hdAlbumThumbFilePath?: string;
+  hdAlbumThumbBase64OrImageUri?: string;
   hdAlbumThumbFileHash?: string;
   albumName?: string;
   musicGenre?: string;
@@ -305,7 +307,7 @@ export type WeChatPayOptions = {
   partnerId: string;
   prepayId: string;
   nonceStr: string;
-  timeStamp: string;
+  timeStamp: number;
   sign: string;
   package: string;
   extraData: string;

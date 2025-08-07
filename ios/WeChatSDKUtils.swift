@@ -8,6 +8,7 @@
 import Foundation
 import CommonCrypto
 import WechatOpenSDK
+import AVFoundation
 
 enum NetworkError: Error {
     case invalidURL
@@ -164,10 +165,10 @@ struct WeChatSDKUtils {
     
     static func getMiniProgramType(_ type: String) -> WXMiniProgramType {
         switch type {
-        case "release": return WXMiniProgramTypeRelease
-        case "test": return WXMiniProgramTypeTest
-        case "preview": return WXMiniProgramTypePreview
-        default: return WXMiniProgramTypeRelease
+        case "release": return WXMiniProgramType.release
+        case "test": return WXMiniProgramType.test
+        case "preview": return WXMiniProgramType.preview
+        default: return WXMiniProgramType.release
         }
     }
     

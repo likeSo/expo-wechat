@@ -1,5 +1,6 @@
+import Foundation
 import ExpoModulesCore
-import WXLibSwift
+import WechatOpenSDK
 
 let apiNotRegisteredException = Exception(name: "ApiNotRegisteredException", description: "Please call registerApp to initialize WX api first!", code: "ERR_NOT_REGISTERED")
 
@@ -185,11 +186,13 @@ public class ExpoWechatModule: Module {
                 let fileObject = WXFileObject()
                 let isFileUri = base64OrFileUri.hasPrefix("file://")
                 if isFileUri {
-                    let fileUrl = URL(fileURLWithPath: String(base64OrFileUri[7...]))
-                    
-                    fileObject.fileData = Data(contentsOf: fileUrl, options: .mappedIfSafe)
+                    let startIndex = base64OrFileUri.index(base64OrFileUri.startIndex, offsetBy: 7)
+                    let fileUrl = URL(fileURLWithPath: String(base64OrFileUri[startIndex...]))
+                    if let fileData = try? Data(contentsOf: fileUrl, options: .mappedIfSafe) {
+                        fileObject.fileData = fileData
+                    }
                 } else {
-                    fileObject.fileData = Data(base64Encoded: base64OrFileUri, options: .ignoreUnknownCharacters)
+                    fileObject.fileData = Data(base64Encoded: base64OrFileUri, options: .ignoreUnknownCharacters) ?? Data()
                 }
                 
                 let mediaMessage = WXMediaMessage()
@@ -214,23 +217,34 @@ public class ExpoWechatModule: Module {
                 let musicObject = WXMusicVideoObject()
                 musicObject.musicUrl = options.musicWebpageUrl
                 musicObject.musicDataUrl = options.musicFileUri
-                musicObject.songLyric = options.songLyric
-                musicObject.hdAlbumThumbFilePath = options.hdAlbumThumbFilePath
+                if options.songLyric != nil {
+                    musicObject.songLyric = options.songLyric!
+                }
+                let hdAlbumThumbImageData = WeChatSDKUtils.getImageDataFromBase64OrUri(options.hdAlbumThumbBase64OrImageUri)
+                if hdAlbumThumbImageData != nil {
+                    musicObject.hdAlbumThumbData = hdAlbumThumbImageData!
+                }
                 musicObject.hdAlbumThumbFileHash = options.hdAlbumThumbFileHash
                 musicObject.singerName = options.singerName
                 musicObject.albumName = options.albumName
                 musicObject.musicGenre = options.musicGenre
-                musicObject.issueDate = options.issueDate
+                if options.issueDate != nil {
+                    musicObject.issueDate = options.issueDate!
+                }
                 musicObject.identification = options.identification
                 
                 let mediaMessage = WXMediaMessage()
                 mediaMessage.mediaObject = musicObject
-                mediaMessage.title = options.title
-                mediaMessage.description = options.description
+                if options.title != nil {
+                    mediaMessage.title = options.title!
+                }
+                if options.description != nil {
+                    mediaMessage.description = options.description!
+                }
                 mediaMessage.messageExt = options.extraMessage
                 let thumbImageData = WeChatSDKUtils.getImageDataFromBase64OrUri(options.thumbBase64OrImageUri)
                 if (thumbImageData != nil) {
-                    mediaMessage.thumbData = ImageCompressUtils.compressImageData(thumbImageData, toTargetKB: 64)
+                    mediaMessage.thumbData = ImageCompressUtils.compressImageData(thumbImageData!, toTargetKB: 64)
                 }
                 
                 let req = SendMessageToWXReq()
@@ -250,22 +264,29 @@ public class ExpoWechatModule: Module {
             if (isApiRegistered) {
                 let videoObject = WXVideoObject()
                 videoObject.videoUrl = options.videoUri
-                videoObject.videoLowBandUrl = options.lowQualityVideoUri
+                if options.lowQualityVideoUri != nil {
+                    videoObject.videoLowBandUrl = options.lowQualityVideoUri!
+                }
                 
                 let mediaMessage = WXMediaMessage()
                 mediaMessage.mediaObject = videoObject
-                mediaMessage.title = options.title
-                mediaMessage.description = options.description
+                if options.title != nil {
+                    mediaMessage.title = options.title!
+                }
+                if options.description != nil {
+                    mediaMessage.description = options.description!
+                }
                 let thumbImageData =
                 WeChatSDKUtils.getImageDataFromBase64OrUri(options.thumbBase64OrImageUri)
                 if (thumbImageData != nil) {
                     mediaMessage.thumbData =
-                    ImageCompressUtils.compressImageData(thumbImageData, toTargetKB: 64)
+                    ImageCompressUtils.compressImageData(thumbImageData!, toTargetKB: 64)
                 } else {
                     if (options.videoUri.hasPrefix("file://")) {
-                        let videoPath = String(options.videoUri[7...])
+                        let startIndex = options.videoUri.index(options.videoUri.startIndex, offsetBy: 7)
+                        let videoPath = String(options.videoUri[startIndex...])
                         let fileUri = URL(fileURLWithPath: videoPath)
-                        let videoThumb = WeChatSDKUtils.getVideoThumbnail(from: fileUri) { thumbImage in
+                        WeChatSDKUtils.getVideoThumbnail(from: fileUri) { thumbImage in
                             if thumbImage != nil, let imageData = thumbImage!.jpegData(compressionQuality: 0.7) {
                                 let compressedThumbImage = ImageCompressUtils.compressImageData(imageData, toTargetKB: 64)
                                 mediaMessage.thumbData = compressedThumbImage
@@ -290,7 +311,7 @@ public class ExpoWechatModule: Module {
                 let webpageObject = WXWebpageObject()
                 webpageObject.webpageUrl = options.url
                 if options.extraInfo != nil,
-                   let object = JSONSerialization.jsonObject(with: options.extraInfo!.data(using: .utf8)) as? [AnyHashable: Any] {
+                   let object = try? JSONSerialization.jsonObject(with: options.extraInfo!.data(using: .utf8)!) as? [AnyHashable: Any] {
                     webpageObject.extraInfoDic = object
                 }
                 //                        webpageObject.canvasPageXml = options.canvasPageXml
@@ -303,7 +324,7 @@ public class ExpoWechatModule: Module {
                 WeChatSDKUtils.getImageDataFromBase64OrUri(options.thumbBase64OrImageUri)
                 if (thumbImageData != nil) {
                     mediaMessage.thumbData =
-                    ImageCompressUtils.compressImageData(thumbImageData, toTargetKB: 64)
+                    ImageCompressUtils.compressImageData(thumbImageData!, toTargetKB: 64)
                 }
                 
                 let req = SendMessageToWXReq()
@@ -321,7 +342,9 @@ public class ExpoWechatModule: Module {
         AsyncFunction("shareMiniProgram") { (options: ShareMiniProgramOptions, promise: Promise) in
             if (isApiRegistered) {
                 let miniProgramObject = WXMiniProgramObject()
-                miniProgramObject.webpageUrl = options.webpageUrl
+                if options.webpageUrl != nil {
+                    miniProgramObject.webpageUrl = options.webpageUrl!
+                }
                 miniProgramObject.userName = options.id
                 miniProgramObject.path = options.path
                 miniProgramObject.miniProgramType = WeChatSDKUtils.getMiniProgramType(options.type)
@@ -332,13 +355,17 @@ public class ExpoWechatModule: Module {
                 
                 let mediaMessage = WXMediaMessage()
                 mediaMessage.mediaObject = miniProgramObject
-                mediaMessage.title = options.title
-                mediaMessage.description = options.description
+                if options.title != nil {
+                    mediaMessage.title = options.title!
+                }
+                if options.description != nil {
+                    mediaMessage.description = options.description!
+                }
                 let thumbImageData =
                 WeChatSDKUtils.getImageDataFromBase64OrUri(options.thumbBase64OrImageUri)
                 if (thumbImageData != nil) {
                     mediaMessage.thumbData =
-                    ImageCompressUtils.compressImageData(thumbImageData, toTargetKB: 64)
+                    ImageCompressUtils.compressImageData(thumbImageData!, toTargetKB: 64)
                 }
                 let req = SendMessageToWXReq()
                 req.bText = false
@@ -358,7 +385,7 @@ public class ExpoWechatModule: Module {
                 let req = WXLaunchMiniProgramReq()
                 req.userName = options.id
                 req.path = options.path
-                req.miniprogramType = WeChatSDKUtils.getMiniProgramType(options.type)
+                req.miniProgramType = WeChatSDKUtils.getMiniProgramType(options.type)
                 req.extMsg = options.extraData
                 WXApi.send(req) { succeed in
                     promise.resolve(succeed)
@@ -371,7 +398,7 @@ public class ExpoWechatModule: Module {
         AsyncFunction("openWeChatCustomerServiceChat") { (corpId: String,
                                                           url: String,
                                                           promise: Promise) in
-            if (api != null) {
+            if (isApiRegistered) {
                 let req = WXOpenCustomerServiceReq()
                 req.corpid = corpId
                 req.url = url
@@ -383,7 +410,7 @@ public class ExpoWechatModule: Module {
             }
         }
         
-        AsyncFunction("sendSubscribeMessage") { (scene: Int,
+        AsyncFunction("sendSubscribeMessage") { (scene: UInt32,
                                                  templateId: String,
                                                  reserved: String,
                                                  promise: Promise) in

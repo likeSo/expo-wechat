@@ -7,7 +7,7 @@
 
 import Foundation
 import ExpoModulesCore
-import WXLibSwift
+import WechatOpenSDK
 
 
 /**
@@ -73,7 +73,7 @@ struct ShareMusicOptions : Record {
     var songLyric: String?
 
     @Field
-    var hdAlbumThumbFilePath: String?
+    var hdAlbumThumbBase64OrImageUri: String?
 
     @Field
     var hdAlbumThumbFileHash: String?
@@ -85,7 +85,7 @@ struct ShareMusicOptions : Record {
     var musicGenre: String?
 
     @Field
-    var issueDate: Int64?
+    var issueDate: UInt64?
 
     @Field
     var identification: String?
@@ -221,7 +221,7 @@ struct WeChatPayOptions : Record {
     var nonceStr: String = ""
 
     @Field
-    var timeStamp: String = ""
+    var timeStamp: UInt32 = 0
 
     @Field
     var sign: String = ""

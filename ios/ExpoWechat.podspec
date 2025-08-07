@@ -20,10 +20,8 @@ Pod::Spec.new do |s|
 
   s.dependency 'ExpoModulesCore'
 
-  # s.dependency 'WXLibSwift'
-  
- s.dependency 'WXLibSwift/NoPay'
-  
+  s.dependency 'OpenWeChatSDKNoPay','~> 2.0.5'
+
   # Swift/Objective-C compatibility
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',

@@ -223,6 +223,7 @@ export default function App() {
           keyboardType="numeric"
           value={miniProgramId}
           onChangeText={setMiniProgramId}
+          style={styles.textInput}
         />
         <TextInput
           placeholder="小程序ID"
@@ -230,6 +231,7 @@ export default function App() {
           keyboardType="numeric"
           value={miniProgramPath}
           onChangeText={setMiniProgramPath}
+          style={styles.textInput}
         />
         <Button title="点击分享网页到微信" onPress={onShareMiniProgram} />
       </Group>
@@ -240,6 +242,7 @@ export default function App() {
           keyboardType="numeric"
           value={miniPrgramIdToLaunch}
           onChangeText={setMiniPrgramIdToLaunch}
+          style={styles.textInput}
         />
         <Button title="启动小程序" onPress={onLaunchMiniProgram} />
       </Group>
@@ -267,7 +270,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F5F5",
   },
   contentContainer: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 36,
+    paddingTop: 84,
   },
 
   group: {
