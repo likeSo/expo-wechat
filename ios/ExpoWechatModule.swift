@@ -52,7 +52,9 @@ public class ExpoWechatModule: Module {
         }
         
         AsyncFunction("registerApp") { (appId: String, universalLink: String) in
-            return WXApi.registerApp(appId, universalLink: universalLink)
+            let result = WXApi.registerApp(appId, universalLink: universalLink)
+            isApiRegistered = true
+            return result
         }
         
         AsyncFunction("startLogByLevel") { (logLevel: String) in
