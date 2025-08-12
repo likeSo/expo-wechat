@@ -78,7 +78,7 @@ URL Scheme白名单，也就是`LSApplicationQueriesSchemes`字段，因为是�
 # 使用
 
 ```typescript
-import * as ExpoWeChat from 'expo-wechat'
+import ExpoWeChat from 'expo-wechat'
 
 const result = await ExpoWeChat.registerApp(wechatAppId, universalLink);
 ```
