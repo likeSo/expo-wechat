@@ -232,3 +232,8 @@ QQ 群：682911244
 - [ ] 实现选择发票功能
 - [x] 发布不带支付功能的SDK
 - [ ] 完善文档
+
+# 常见问题
+### 报错 could not find module `ExpoModulesCore` for target '86_64-apple-ios-simulator'; found: arm64-apple-ios-simulator
+这种问题通常发生在苹果M系列芯片电脑上，由于M芯片都是ARM架构，而一旦你的xcframework不提供ARM架构模拟器的包，就会报这种错。
+解决方案是启动Rosetta模拟器，或者用真机。

@@ -68,7 +68,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - ExpoWechat (0.1.6):
+  - ExpoWechat (0.1.7):
     - ExpoModulesCore
     - OpenWeChatSDKNoPay (~> 2.0.5)
   - fast_float (6.1.4)
