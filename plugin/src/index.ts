@@ -3,7 +3,33 @@ import {
   ConfigPlugin,
   withAndroidManifest,
   withInfoPlist,
+  withDangerousMod,
 } from "expo/config-plugins";
+import * as fs from "fs";
+import * as path from "path";
+
+const createWeChatEntryActivities = (packageName: string) => `package ${packageName}.wxapi
+
+import android.app.Activity
+import android.os.Bundle
+import expo.modules.wechat.ExpoWechatModule
+
+class WXEntryActivity : Activity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        ExpoWechatModule.moduleInstance?.handleIntent(intent);
+        finish()
+    }
+}
+
+class WXPayEntryActivity : Activity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        ExpoWechatModule.moduleInstance?.handleIntent(intent)
+        finish()
+    }
+}
+`;
 
 const withExpoWechat: ConfigPlugin = (config) => {
   config = withAndroidManifest(config, (config) => {
@@ -12,20 +38,15 @@ const withExpoWechat: ConfigPlugin = (config) => {
     );
     let activities = mainApplication.activity ?? [];
     let packageName = config.android?.package;
-    let entryActivityIndex = activities.findIndex(
-      (activity) => activity.$["android:name"] === ".wxapi.WXEntryActivity"
-    );
-    let payEntryActivityIndex = activities.findIndex(
-      (activity) => activity.$["android:name"] === ".wxapi.WXPayEntryActivity"
+
+    // Remove existing entries from this plugin to avoid duplicates
+    activities = activities.filter(
+      (activity) =>
+        activity.$["android:name"] !== ".wxapi.WXEntryActivity" &&
+        activity.$["android:name"] !== ".wxapi.WXPayEntryActivity"
     );
 
-    if (entryActivityIndex !== -1) {
-      activities.splice(entryActivityIndex, 1);
-    }
-    if (payEntryActivityIndex !== -1) {
-      activities.splice(payEntryActivityIndex, 1);
-    }
-
+    // Add new entries pointing to the generated wrapper activities
     activities.push(
       {
         $: {
@@ -51,6 +72,36 @@ const withExpoWechat: ConfigPlugin = (config) => {
     mainApplication.activity = activities;
     return config;
   });
+
+  config = withDangerousMod(config, [
+    "android",
+    async (config) => {
+      const androidMainPath = path.join(
+        config.modRequest.platformProjectRoot,
+        "app",
+        "src",
+        "main"
+      );
+      const packageName = config.android?.package;
+
+      if (!packageName) {
+        throw new Error("Android package name is not defined in app.json");
+      }
+
+      const packagePath = packageName.replace(/\./g, path.sep);
+      const wxapiPath = path.join(androidMainPath, "java", packagePath, "wxapi");
+
+      fs.mkdirSync(wxapiPath, { recursive: true });
+
+      const payEntryActivityContent = createWeChatEntryActivities(packageName);
+      fs.writeFileSync(
+        path.join(wxapiPath, "WXEntryActivities.kt"),
+        payEntryActivityContent
+      );
+
+      return config;
+    },
+  ]);
 
   config = withInfoPlist(config, (config) => {
     let queriesSchemes = config.modResults.LSApplicationQueriesSchemes ?? [];
