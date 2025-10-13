@@ -203,7 +203,7 @@ class LaunchMiniProgramOptions : Record {
     var extraData: String? = null
 }
 
-class WeChatPayOptions : Record {
+class PayOptions : Record {
     @Field
     var partnerId: String = ""
 

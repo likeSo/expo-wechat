@@ -4,7 +4,6 @@
 React Native Expo版本的微信SDK。
 本框架旨在让你所有原生代码配置都在RN侧以及json文件中进行，真正做到0原生代码配置，充分利用expo的优势来做到简单好用。
 
-⚠️此项目尚处于Beta状态，还未经过充分的测试，但作者积极维护，如有任何问题，都可以issue或者加群提问。⚠️
 
 # 安装
 ```shell
@@ -25,7 +24,7 @@ URL Scheme用于给你的应用注册一个独一无二的链接，使别的软�
 通用链接是微信首推的唤起微信和你的App的方案，当通用链接没有配置好的时候，才会回退到URL Scheme方案。
 通用链接允许你向苹果注册一个URL地址，当访问这个地址的时候，系统优先唤起你的App，而不是网页。简单来说，它是一种比URL Scheme更好的唤起App的解决方案。
 
-使用Expo官方提供的方式来添加URL Scheme，以及配置通用链接。在`app.json`中添加以下字段：
+使用Expo官方提供的方式来添加URL Scheme，以及配置通用链接。在`app.json`或`app.config.js`中添加以下字段：
 ```json
 "ios": {
     "scheme": [
@@ -42,6 +41,7 @@ URL Scheme白名单，也就是`LSApplicationQueriesSchemes`字段，因为是�
 
 ## 安卓
 
+微信所需的proguard混淆规则内容如下：
 ```text
 -keep class com.tencent.mm.opensdk.** {
     *;
@@ -56,11 +56,17 @@ URL Scheme白名单，也就是`LSApplicationQueriesSchemes`字段，因为是�
 }
 ```
 
-需要配置proguard文件，在`app.json`中添加以下字段：
+需要利用[Expo BuildProperties](https://docs.expo.dev/versions/latest/sdk/build-properties/)，在`app.json`或`app.config.js`中添加以下内容：
 ```json
-"android": {
-    "extraProguardRules": ""
-}
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "extraProguardRules": "把以上规则内容放到这里",
+          },
+        }
+      ]
 ```
 
 
@@ -71,7 +77,9 @@ URL Scheme白名单，也就是`LSApplicationQueriesSchemes`字段，因为是�
     "expo-wechat"
 ]
 ```
-这些是全部的配置项了，都可以通过expo的`app.json`来完成，配置部分完成后，就可以正常使用微信SDK了。
+> 注意这里的plugins对象跟上面的expo-build-properties的是同一个对象。
+> 
+这些是全部的配置项了，都可以通过expo的`app.json`或`app.config.js`来完成，配置部分完成后，就可以正常使用微信SDK了。
 
 请注意，由于包含了自定义的原生代码，无法在expo go中直接使用。你应该使用`npx expo run:android`或者`npx expo run:ios`，编译原生app。详情参见官方[DevClient文档](https://docs.expo.dev/versions/latest/sdk/dev-client/)。
 
@@ -86,6 +94,11 @@ const result = await ExpoWeChat.registerApp(wechatAppId, universalLink);
 # API
 以下是所有已支持的API：
 ```typescript
+  /**
+   * 是否已经成功调用registerApp方法。
+   */
+  isRegistered: boolean;
+  
   isWXAppInstalled(): Promise<boolean>;
   getApiVersion(): Promise<string>;
   getWXAppInstallUrl(): Promise<string | null>;
@@ -216,8 +229,10 @@ ExpoWeChat.sendAuthRequest()
 
 # Example
 
-克隆本仓库，进入example文件夹，执行`npm i`，再启动项目。
-启动之前，请在`.env`文件内配置微信AppId和Key，通用链接。
+克隆本仓库，并启动Example示例项目的步骤如下
+- 克隆本仓库后，在项目根目录执行`npm run build plugin`，然后按下`ctrl + c`退出命令即可。
+- 进入example文件夹，执行`npm i`安装依赖。
+- 启动之前，请在`.env`文件内配置微信AppId和Key，以及通用链接。
 
 # 鸣谢
 本框架参考了许多[react-native-wechat-lib](https://github.com/little-snow-fox/react-native-wechat-lib)的代码，实现了基本上所有的API的功能，在此基础上，极大的简化了配置流程，并使用了最新的微信SDK，感谢前人！
@@ -232,3 +247,12 @@ QQ 群：682911244
 - [ ] 实现选择发票功能
 - [x] 发布不带支付功能的SDK
 - [ ] 完善文档
+
+# 常见问题
+### 报错 could not find module `ExpoModulesCore` for target '86_64-apple-ios-simulator'; found: arm64-apple-ios-simulator
+这种问题通常发生在苹果M系列芯片电脑上，由于M芯片都是ARM架构，而一旦你的xcframework不提供ARM架构模拟器的包，就会报这种错。
+#### 解决方案
+以下方案是我们的一些经验，你可以都试一下：
+- 启动Rosetta模拟器。
+- 使用真机运行项目。
+- 升级Xcode到16.4以及以后。

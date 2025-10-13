@@ -303,7 +303,7 @@ export type LaunchMiniProgramOptions = {
  * @param package 扩展字段。
  * @param extraData 额外数据。
  */
-export type WeChatPayOptions = {
+export type PayOptions = {
   partnerId: string;
   prepayId: string;
   nonceStr: string;

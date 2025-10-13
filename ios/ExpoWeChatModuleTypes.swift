@@ -210,7 +210,7 @@ struct LaunchMiniProgramOptions : Record {
     var extraData: String?
 }
 
-struct WeChatPayOptions : Record {
+struct PayOptions : Record {
     @Field
     var partnerId: String = ""
 

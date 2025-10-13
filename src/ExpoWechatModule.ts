@@ -14,6 +14,11 @@ import {
 } from "./ExpoWechat.types";
 
 declare class ExpoWechatModule extends NativeModule<ExpoWechatModuleEvents> {
+  /**
+   * 是否已经成功调用registerApp方法。
+   */
+  isRegistered: boolean;
+
   isWXAppInstalled(): Promise<boolean>;
   getApiVersion(): Promise<string>;
   getWXAppInstallUrl(): Promise<string | null>;

@@ -18,7 +18,7 @@ export default function App() {
   const [miniProgramId, setMiniProgramId] = useState("");
   const [miniProgramPath, setMiniProgramPath] = useState("");
 
-  const [miniPrgramIdToLaunch, setMiniPrgramIdToLaunch] = useState("");
+  const [miniProgramIdToLaunch, setMiniProgramIdToLaunch] = useState("");
 
   const onAuthResult = useEvent(ExpoWechat, "onAuthResult");
   const wechatAppId = process.env.EXPO_PUBLIC_WECHAT_APP_ID;
@@ -166,11 +166,11 @@ export default function App() {
       return;
     }
     const result = ExpoWechat.launchMiniProgram({
-      id: miniPrgramIdToLaunch,
+      id: miniProgramIdToLaunch,
       type: "release",
     });
     console.log("Share to wechat timeline result:", result);
-  }, [miniPrgramIdToLaunch]);
+  }, [miniProgramIdToLaunch]);
 
   return (
     <ScrollView
@@ -240,8 +240,8 @@ export default function App() {
           placeholder="小程序ID"
           clearButtonMode="while-editing"
           keyboardType="numeric"
-          value={miniPrgramIdToLaunch}
-          onChangeText={setMiniPrgramIdToLaunch}
+          value={miniProgramIdToLaunch}
+          onChangeText={setMiniProgramIdToLaunch}
           style={styles.textInput}
         />
         <Button title="启动小程序" onPress={onLaunchMiniProgram} />

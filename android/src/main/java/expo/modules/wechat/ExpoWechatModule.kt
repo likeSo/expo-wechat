@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.util.Log
+import android.util.Property
 import androidx.core.content.FileProvider
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.diffdev.DiffDevOAuthFactory
@@ -65,6 +66,7 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
     var api: IWXAPI? = null;
     var wxAppId: String? = null;
     var logLevel: LogLevel? = null
+    var isApiRegistered = false
 
     // Each module class must implement the definition function. The definition consists of components
     // that describes the module's functionality and behavior.
@@ -96,11 +98,8 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
             moduleInstance = this@ExpoWechatModule
         }
 
-        AsyncFunction("registerApp") { appId: String, universalLink: String ->
-            wxAppId = appId;
-            api = WXAPIFactory.createWXAPI(appContext.reactContext, appId, true)
-            val result = api?.registerApp(appId) ?: false
-            return@AsyncFunction result
+        Property("isRegistered") {
+            return@Property isApiRegistered
         }
 
         AsyncFunction("isWXAppInstalled") {
@@ -114,7 +113,13 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
         AsyncFunction("getWXAppInstallUrl") {
             return@AsyncFunction null
         }
-
+        AsyncFunction("registerApp") { appId: String, universalLink: String ->
+            wxAppId = appId;
+            api = WXAPIFactory.createWXAPI(appContext.reactContext, appId, true)
+            val result = api?.registerApp(appId) ?: false
+            isApiRegistered = result
+            return@AsyncFunction result
+        }
         AsyncFunction("startLogByLevel") { level: String ->
             logLevel = LogLevel.fromString(level)
             api?.setLogImpl(object : ILog {
