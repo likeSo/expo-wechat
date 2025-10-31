@@ -88,6 +88,7 @@ URL Scheme白名单，也就是`LSApplicationQueriesSchemes`字段，因为是�
 ```typescript
 import ExpoWeChat from 'expo-wechat'
 
+/// 初始化微信SDK。一般都在用户接受了隐私政策后，调用此方法。
 const result = await ExpoWeChat.registerApp(wechatAppId, universalLink);
 ```
 
@@ -210,6 +211,7 @@ const result = await ExpoWeChat.registerApp(wechatAppId, universalLink);
 对于需要观测结果的API，比如分享，登录，需要拿到结果信息的场景，应当使用事件监听的方式来实现：
 
 ```typescript
+import { useEvent } from 'expo'
 /// 当得到授权登录结果后，会回调此hook并重新渲染组件
 const onAuthResult = useEvent(ExpoWechat, "onAuthResult");
 /// 这里的onAuthResult是普通授权登录结果的事件名，类似的还有：
@@ -222,6 +224,12 @@ useEffect(() => {
     onAuthResult.code
     onAuthResult.state
 }, [onAuthResult])
+
+useEffect(() => {
+    // `useEvent`是expo提供的一个`addEventListener`的便捷方法
+    // 你依然可以调用`ExpoWechat.addEventListener('onAuthResult', (e) => {})`方法来监听返回事件
+    // 但请不要忘记在卸载的时候移除监听
+}, [])
 
 /// 发送授权登录请求，最终的结果会体现在hook里
 ExpoWeChat.sendAuthRequest()
