@@ -1,7 +1,7 @@
 # expo-wechat
 ![npm](https://img.shields.io/npm/v/expo-wechat.svg)
 
-React Native Expo版本的微信SDK。
+React Native Expo版本的微信SDK。基本实现了所有的微信官方SDK的功能，包括支付、登录、分享、客服、跳转小程序等。支持安卓和iOS。
 本框架旨在让你所有原生代码配置都在RN侧以及json文件中进行，真正做到0原生代码配置，充分利用expo的优势来做到简单好用。
 
 
@@ -18,11 +18,12 @@ npx expo install expo-wechat
 ## iOS
 iOS需要配置通用链接和URL Scheme。
 
-URL Scheme用于给你的应用注册一个独一无二的链接，使别的软件可以通过这个链接直接唤起你的App。
-是微信回调起你的App的保底方案，当通用链接唤起失败后，微信会尝试使用URL Scheme来唤起你的App。这个URL Scheme就是微信开放平台给你的微信id，类似于`wx1234567890`这种格式的。
-
-通用链接是微信首推的唤起微信和你的App的方案，当通用链接没有配置好的时候，才会回退到URL Scheme方案。
-通用链接允许你向苹果注册一个URL地址，当访问这个地址的时候，系统优先唤起你的App，而不是网页。简单来说，它是一种比URL Scheme更好的唤起App的解决方案。
+> 什么是URL Scheme和通用链接？简单来说这就是iOS上微信授权完成后，跳回你的app的两种途径。
+> URL Scheme用于给你的应用注册一个独一无二的链接，使别的软件可以通过这个链接直接唤起你的App。
+> 是微信回调起你的App的保底方案，当通用链接唤起失败后，微信会尝试使用URL Scheme来唤起你的App。这个URL Scheme就是微信开放平台给你的微信id，类似于`wx1234567890`这种格式的。
+> 
+> 通用链接是微信首推的唤起微信和你的App的方案，当通用链接没有配置好的时候，才会回退到URL Scheme方案。
+> 通用链接允许你向苹果注册一个URL地址，当访问这个地址的时候，系统优先唤起你的App，而不是网页。简单来说，它是一种比URL Scheme更好的唤起App的解决方案。
 
 使用Expo官方提供的方式来添加URL Scheme，以及配置通用链接。在`app.json`或`app.config.js`中添加以下字段：
 ```json
@@ -35,12 +36,13 @@ URL Scheme用于给你的应用注册一个独一无二的链接，使别的软�
     ]
 }
 ```
-这里的通用链接如何创建，以及如何向苹果注册，也许你需要参照一下[苹果官方文档](https://developer.apple.com/documentation/xcode/supporting-associated-domains)。
+这里的通用链接如何生成，以及如何向苹果注册，也许你需要参照一下[苹果官方文档](https://developer.apple.com/documentation/xcode/supporting-associated-domains)。
 
-URL Scheme白名单，也就是`LSApplicationQueriesSchemes`字段，因为是固定不变的，所以已经自动帮你配置好。
+> URL Scheme白名单，也就是`LSApplicationQueriesSchemes`字段，因为是固定不变的，插件已经自动帮你配置好了。
 
 ## 安卓
 
+在安卓上，你需要配置微信的混淆规则，以免打包时将微信的框架代码排除在外而报错。
 微信所需的proguard混淆规则内容如下：
 ```text
 -keep class com.tencent.mm.opensdk.** {
@@ -238,7 +240,8 @@ ExpoWeChat.sendAuthRequest()
 # Example
 
 克隆本仓库，并启动Example示例项目的步骤如下
-- 克隆本仓库后，在项目根目录执行`npm run build plugin`，然后按下`ctrl + c`退出命令即可。
+- 克隆本仓库后，在根目录执行`npm i`
+- 在根目录执行`npm run build plugin`，然后按下`ctrl + c`退出命令即可。
 - 进入example文件夹，执行`npm i`安装依赖。
 - 启动之前，请在`.env`文件内配置微信AppId和Key，以及通用链接。
 
