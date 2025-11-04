@@ -85,7 +85,7 @@ iOS需要配置通用链接和URL Scheme。
 
 请注意，由于包含了自定义的原生代码，无法在expo go中直接使用。你应该使用`npx expo run:android`或者`npx expo run:ios`，编译原生app。详情参见官方[DevClient文档](https://docs.expo.dev/versions/latest/sdk/dev-client/)。
 
-# 使用
+# 初始化
 
 ```typescript
 import ExpoWeChat from 'expo-wechat'
@@ -94,148 +94,559 @@ import ExpoWeChat from 'expo-wechat'
 const result = await ExpoWeChat.registerApp(wechatAppId, universalLink);
 ```
 
-# API
-以下是所有已支持的API：
+# API文档
+
+## 属性
+
+| 属性名 | 类型 | 说明 |
+|--------|------|------|
+| `isRegistered` | `boolean` | 是否已经成功调用registerApp方法 |
+
+## 初始化与检测
+
+### registerApp
 ```typescript
-  /**
-   * 是否已经成功调用registerApp方法。
-   */
-  isRegistered: boolean;
+registerApp(appId: string, universalLink: string): Promise<boolean>
+```
+
+初始化微信SDK。返回初始化结果。
+
+**参数：**
+- `appId`: 微信App ID
+- `universalLink`: 通用链接地址（iOS必需）
+
+**返回值：** `Promise<boolean>` - 初始化是否成功
+
+### isWXAppInstalled
+```typescript
+isWXAppInstalled(): Promise<boolean>
+```
+
+检查用户是否已安装微信客户端。
+
+**返回值：** `Promise<boolean>` - 是否已安装微信
+
+### getApiVersion
+```typescript
+getApiVersion(): Promise<string>
+```
+
+获取微信SDK的版本号。
+
+**返回值：** `Promise<string>` - SDK版本号
+
+### getWXAppInstallUrl
+```typescript
+getWXAppInstallUrl(): Promise<string | null>
+```
+
+获取微信安装的URL。
+
+**返回值：** `Promise<string | null>` - 安装URL或null
+
+### openWXApp
+```typescript
+openWXApp(): Promise<boolean>
+```
+
+打开微信App。
+
+**返回值：** `Promise<boolean>` - 打开是否成功
+
+### checkUniversalLinkReady
+```typescript
+checkUniversalLinkReady(): Promise<void>
+```
+
+启动微信自检流程，打印自检日志。
+
+**注意：** iOS Only
+
+## 授权登录
+
+### sendAuthRequest
+```typescript
+sendAuthRequest(
+  scope: "snsapi_userinfo" | string,
+  state: string
+): Promise<boolean>
+```
+
+发送微信授权登录请求。
+
+**参数：**
+- `scope`: 微信scope字段，如`snsapi_userinfo`
+- `state`: 微信state字段，用于维持请求和回调的状态
+
+**返回值：** `Promise<boolean>` - 请求是否发送成功
+
+**注意：** 此方法返回的是请求发送结果，不是授权结果。授权结果需通过监听`onAuthResult`事件获取。
+
+### sendAuthByQRRequest
+```typescript
+sendAuthByQRRequest(options: AuthByQROptions): Promise<string>
+```
+
+发送微信扫码登录请求。
+
+**参数：**
+```typescript
+interface AuthByQROptions {
+  appId: string;              // 微信App ID
+  appSecret: string;          // 微信App Secret
+  scope: "snsapi_userinfo" | string;  // 授权范围
+  schemeData?: string;        // 可选的scheme数据
+}
+```
+
+**返回值：** `Promise<string>` - 二维码base64编码的图片数据
+
+## 分享功能
+
+### shareText
+```typescript
+shareText(text: string, scene: ShareScene): Promise<boolean>
+```
+
+分享文字到微信。
+
+**参数：**
+- `text`: 要分享的文字内容
+- `scene`: 分享目标场景 (`'session' | 'timeline' | 'favorite' | 'status' | 'specifiedContact'`)
+
+**返回值：** `Promise<boolean>` - 分享请求是否发送成功
+
+### shareImage
+```typescript
+shareImage(options: ShareImageOptions): Promise<boolean>
+```
+
+分享图片到微信。
+
+**参数：**
+```typescript
+interface ShareImageOptions {
+  base64OrImageUri: string;           // 图片内容（本地URI或base64）
+  scene: ShareScene;                  // 分享场景
+  thumbBase64OrImageUri?: string;     // 缩略图内容（可选）
+  imageDataHash?: string | null;      // 图片哈希值（可选）
+  miniProgramId?: string | null;      // 小程序原始id（可选）
+  miniProgramPath?: string | null;    // 小程序路径（可选）
+}
+```
+
+**返回值：** `Promise<boolean>` - 分享请求是否发送成功
+
+### shareFile
+```typescript
+shareFile(
+  base64OrFileUri: string,
+  title: string,
+  scene: ShareScene
+): Promise<boolean>
+```
+
+分享文件到微信。
+
+**参数：**
+- `base64OrFileUri`: 文件内容（本地URI或base64）
+- `title`: 文件标题
+- `scene`: 分享目标场景
+
+**返回值：** `Promise<boolean>` - 分享请求是否发送成功
+
+### shareMusic
+```typescript
+shareMusic(options: ShareMusicOptions): Promise<boolean>
+```
+
+分享音乐到微信。
+
+**参数：**
+```typescript
+interface ShareMusicOptions {
+  musicWebpageUrl: string;                  // 音乐网页URL
+  musicFileUri: string;                     // 音乐文件URI
+  singerName: string;                       // 歌手名称
+  duration: number;                         // 音乐时长（秒）
+  scene: ShareScene;                        // 分享场景
+  songLyric?: string;                       // 歌词（可选）
+  hdAlbumThumbFilePath?: string;            // 高清专辑缩略图文件路径（安卓）
+  hdAlbumThumbBase64OrImageUri?: string;    // 高清专辑缩略图（iOS）
+  hdAlbumThumbFileHash?: string;            // 高清专辑缩略图文件哈希值
+  albumName?: string;                       // 专辑名称
+  title?: string;                           // 标题（可选）
+  description?: string;                     // 描述（可选）
+  thumbBase64OrImageUri?: string;           // 缩略图（可选）
+}
+```
+
+**返回值：** `Promise<boolean>` - 分享请求是否发送成功
+
+### shareVideo
+```typescript
+shareVideo(options: ShareVideoOptions): Promise<boolean>
+```
+
+分享视频到微信。
+
+**参数：**
+```typescript
+interface ShareVideoOptions {
+  videoUri: string;                         // 视频文件URI
+  scene: ShareScene;                        // 分享场景
+  lowQualityVideoUri?: string;              // 低质量视频URI（可选）
+  thumbBase64OrImageUri?: string;           // 缩略图（可选）
+  title?: string;                           // 标题（可选）
+  description?: string;                     // 描述（可选）
+}
+```
+
+**返回值：** `Promise<boolean>` - 分享请求是否发送成功
+
+### shareWebpage
+```typescript
+shareWebpage(options: ShareWebpageOptions): Promise<boolean>
+```
+
+分享网页到微信。
+
+**参数：**
+```typescript
+interface ShareWebpageOptions {
+  url: string;                              // 网页URL
+  scene: ShareScene;                        // 分享场景
+  title?: string;                           // 标题（可选）
+  description?: string;                     // 描述（可选）
+  thumbBase64OrImageUri?: string;           // 缩略图（可选）
+  extraInfo?: string;                       // 额外信息（可选）
+}
+```
+
+**返回值：** `Promise<boolean>` - 分享请求是否发送成功
+
+### shareMiniProgram
+```typescript
+shareMiniProgram(options: ShareMiniProgramOptions): Promise<boolean>
+```
+
+分享小程序到微信。
+
+**参数：**
+```typescript
+interface ShareMiniProgramOptions {
+  id: string;                               // 小程序原始id
+  type: WeChatMiniProgramType;              // 小程序类型 ('release' | 'test' | 'preview')
+  path?: string;                            // 小程序路径（可选）
+  scene: ShareScene;                        // 分享场景
+  webpageUrl?: string;                      // 网页URL（可选）
+  title?: string;                           // 标题（可选）
+  description?: string;                     // 描述（可选）
+  thumbBase64OrImageUri?: string;           // 缩略图（可选）
+  withShareTicket?: boolean;                // 是否携带shareTicket（可选）
+}
+```
+
+**返回值：** `Promise<boolean>` - 分享请求是否发送成功
+
+## 小程序相关
+
+### launchMiniProgram
+```typescript
+launchMiniProgram(options: LaunchMiniProgramOptions): Promise<boolean>
+```
+
+打开微信小程序。
+
+**参数：**
+```typescript
+interface LaunchMiniProgramOptions {
+  id: string;                               // 小程序原始id
+  type: WeChatMiniProgramType;              // 小程序类型
+  path?: string;                            // 小程序路径（可选）
+  extraData?: string;                       // 额外数据（可选）
+}
+```
+
+**返回值：** `Promise<boolean>` - 打开请求是否发送成功
+
+## 支付功能
+
+### pay
+```typescript
+pay(options: PayOptions): Promise<boolean>
+```
+
+发起微信支付。
+
+**参数：**
+```typescript
+interface PayOptions {
+  partnerId: string;                        // 商户号
+  prepayId: string;                         // 预支付交易会话ID
+  nonceStr: string;                         // 随机字符串
+  timeStamp: number;                        // 时间戳
+  sign: string;                             // 签名
+  package: string;                          // 扩展字段
+  extraData: string;                        // 额外数据
+}
+```
+
+**返回值：** `Promise<boolean>` - 支付请求是否发送成功
+
+## 客服与订阅消息
+
+### openWeChatCustomerServiceChat
+```typescript
+openWeChatCustomerServiceChat(cropId: string, url: string): Promise<boolean>
+```
+
+打开微信客服聊天。
+
+**参数：**
+- `cropId`: 企业ID
+- `url`: 客服URL
+
+**返回值：** `Promise<boolean>` - 打开请求是否发送成功
+
+### sendSubscribeMessage
+```typescript
+sendSubscribeMessage(
+  scene: number,
+  templateId: string,
+  reserved: string
+): Promise<boolean>
+```
+
+发送订阅消息。
+
+**参数：**
+- `scene`: 场景
+- `templateId`: 模板ID
+- `reserved`: 保留字段
+
+**返回值：** `Promise<boolean>` - 发送请求是否成功
+
+## 事件监听
+
+调用API返回的Promise仅仅代表调用的成功与否，不代表最终的微信返回结果。对于需要观测结果的API，应当使用事件监听的方式来实现：
+
+### 支持的事件列表
+
+| 事件名 | 说明 | 回调参数类型 |
+|--------|------|------------|
+| `onQRCodeAuthGotQRCode` | 二维码登录时，得到二维码图片 | `{ image: string }` |
+| `onQRCodeAuthUserScanned` | 二维码登录时，用户成功扫描二维码 | `void` |
+| `onQRCodeAuthResult` | 二维码登录结果 | `{ errorCode: number; authCode: string }` |
+| `onShowMessageFromWeChat` | 从微信打开应用时收到的消息 | `ShowMessageFromWeChatPayload` |
+| `onAuthResult` | 授权登录结果 | `AuthResultPayload` |
+| `onPayResult` | 支付结果 | `PayResultPayload` |
+| `onLaunchMiniProgramResult` | 打开小程序结果 | `{ extraInfo?: string }` |
+
+### 授权登录结果结构
+```typescript
+export type AuthResultPayload = {
+  code: string;         // 授权码
+  state: string;        // 状态值
+  url: string;          // 完整URL
+  authResult: boolean;  // 授权是否成功
+  lang: string;         // 语言
+  country: string;      // 国家
+  errorCode: number;    // 错误码
+  errorMessage: string; // 错误信息
+  openId: string;       // 开放ID
+  transaction: string;  // 事务ID
+};
+```
+
+### 支付结果结构
+```typescript
+export type PayResultPayload = {
+  prepayId?: string;    // 预支付ID
+  returnKey?: string;   // 返回键
+  extraInfo?: string;   // 额外信息
+  errorCode: number;    // 错误码
+  errorMessage: string; // 错误信息
+  openId: string;       // 开放ID
+  transaction: string;  // 事务ID
+};
+```
+
+## 错误码说明
+
+```typescript
+export enum ResultErrorCode {
+  ok = 0,             // 成功
+  common = -1,        // 普通错误
+  userCancel = -2,    // 用户取消
+  sentFailed = -3,    // 发送失败
+  authDenied = -4,    // 授权被拒绝
+  unsupported = -5,   // 不支持的操作
+  ban = -6,           // 被禁止
+}
+```
+
+## 使用示例
+
+### 授权登录示例
+```typescript
+import ExpoWeChat from 'expo-wechat'
+import { useEvent, useEffect } from 'expo'
+
+// 初始化
+const initializeWeChat = async () => {
+  const result = await ExpoWeChat.registerApp('wx1234567890', 'https://example.com/');
+  console.log('微信SDK初始化结果:', result);
+};
+
+// 使用useEvent监听授权结果
+const authResult = useEvent(ExpoWeChat, 'onAuthResult');
+
+useEffect(() => {
+  if (authResult) {
+    if (authResult.errorCode === 0) {
+      console.log('授权成功!');
+      console.log('授权码:', authResult.code);
+      console.log('状态:', authResult.state);
+      // 在这里使用code向服务器换取token
+    } else {
+      console.log('授权失败:', authResult.errorMessage);
+    }
+  }
+}, [authResult]);
+
+// 发送授权请求
+const handleWeChatLogin = async () => {
+  // 检查微信是否安装
+  const isInstalled = await ExpoWeChat.isWXAppInstalled();
+  if (!isInstalled) {
+    alert('请先安装微信');
+    return;
+  }
   
-  isWXAppInstalled(): Promise<boolean>;
-  getApiVersion(): Promise<string>;
-  getWXAppInstallUrl(): Promise<string | null>;
-    /**
-   * 打开微信App。返回打开结果。
-   */
-    openWXApp(): Promise<boolean>;
-
-  /**
-   * 初始化微信SDK。返回初始化结果。
-   * @param appId 微信App ID
-   * @param universalLink 通用链接地址
-   */
-  registerApp(appId: string, universalLink: string): Promise<boolean>;
-
-  /**
-   * 启动微信自检流程，打印自检日志。iOS Only
-   */
-  checkUniversalLinkReady(): Promise<void>;
-
-  /**
-   * 发送微信授权登录请求。返回**发送**结果，注意是发送结果不是授权结果，授权结果要从事件中获取。
-   * @param scope 微信scope字段。
-   * @param state 微信state字段。
-   */
-  sendAuthRequest(
-    scope: "snsapi_userinfo" | Omit<string, "snsapi_userinfo">,
-    state: string
-  ): Promise<boolean>;
-
-  /**
-   * 发送微信扫码登录请求。返回微信登录二维码。
-   * @param appId 微信App ID
-   * @param appSecret 微信App Secret
-   */
-  sendAuthByQRRequest(
-    options: AuthByQROptions
-  ): Promise<string>;
-
-  /**
-   * 分享文字到微信。返回分享结果。
-   * @param text 要分享的文字内容。
-   * @param scene 分享目标场景。
-   */
-  shareText(text: string, scene: ShareScene): Promise<boolean>;
-
-  /**
-   * 分享图片到微信。返回分享结果。
-   */
-  shareImage(options: ShareImageOptions): Promise<boolean>;
-
-  /**
-   * 分享文件到微信。返回分享结果。
-   * @param base64OrFileUri 文件内容，可以是本地文件URI，或者base64编码的文件数据。
-   * @param title 文件标题。
-   * @param scene 要分享的目标场景。
-   */
-  shareFile(
-    base64OrFileUri: string,
-    title: string,
-    scene: ShareScene
-  ): Promise<boolean>;
-
-  /**
-   * 分享音乐到微信。返回分享结果。
-   */
-  shareMusic(options: ShareMusicOptions): Promise<boolean>;
-
-  /**
-   * 分享视频到微信。返回分享结果。
-   */
-  shareVideo(options: ShareVideoOptions): Promise<boolean>;
-  /**
-   * 分享网页到微信。返回分享结果。
-   */
-  shareWebpage(options: ShareWebpageOptions): Promise<boolean>;
-  /**
-   * 分享小程序到微信。返回分享结果。
-   */
-  shareMiniProgram(options: ShareMiniProgramOptions): Promise<boolean>;
-
-  /**
-   * 打开微信小程序。返回打开结果。
-   */
-  launchMiniProgram(options: LaunchMiniProgramOptions): Promise<boolean>;
-
-  /**
-   * 打开微信客服聊天。
-   */
-  openWeChatCustomerServiceChat(cropId: string, url: string): Promise<boolean>;
-  /**
-   * 发送订阅消息。
-   * @param scene 场景
-   * @param templateId 模板ID
-   * @param reserved 保留字段
-   */
-  sendSubscribeMessage(
-    scene: number,
-    templateId: string,
-    reserved: string
-  ): Promise<boolean>;
-
-  /**
-   * 微信支付
-   */
-  pay(options: WeChatPayOptions): Promise<boolean>;
+  // 发送授权请求
+  const requestResult = await ExpoWeChat.sendAuthRequest('snsapi_userinfo', 'state123');
+  console.log('授权请求发送结果:', requestResult);
+};
 ```
-调用API返回的Promise仅仅代表调用的成功与否，不代表最终的微信返回结果。
-对于需要观测结果的API，比如分享，登录，需要拿到结果信息的场景，应当使用事件监听的方式来实现：
 
+### 二维码登录示例
 ```typescript
-import { useEvent } from 'expo'
-/// 当得到授权登录结果后，会回调此hook并重新渲染组件
-const onAuthResult = useEvent(ExpoWechat, "onAuthResult");
-/// 这里的onAuthResult是普通授权登录结果的事件名，类似的还有：
-/// onQRCodeAuthGotQRCode 二维码登录时，得到二维码图片回调，你可在页面上展示，让用户扫码
-/// onQRCodeAuthUserScanned 二维码登录时，用户成功扫描到了二维码
-/// onQRCodeAuthResult 二维码登录结果回调
-/// onPayResult 支付结果回调
+import ExpoWeChat from 'expo-wechat'
+import { useEvent, useEffect } from 'expo'
+
+// 监听二维码相关事件
+const qrCodeResult = useEvent(ExpoWeChat, 'onQRCodeAuthGotQRCode');
+const qrCodeScanResult = useEvent(ExpoWeChat, 'onQRCodeAuthUserScanned');
+const qrCodeLoginResult = useEvent(ExpoWeChat, 'onQRCodeAuthResult');
 
 useEffect(() => {
-    onAuthResult.code
-    onAuthResult.state
-}, [onAuthResult])
+  if (qrCodeResult) {
+    console.log('二维码生成成功，可以显示了');
+    // 这里可以使用qrCodeResult.image来渲染二维码
+  }
+}, [qrCodeResult]);
 
 useEffect(() => {
-    // `useEvent`是expo提供的一个`addEventListener`的便捷方法
-    // 你依然可以调用`ExpoWechat.addEventListener('onAuthResult', (e) => {})`方法来监听返回事件
-    // 但请不要忘记在卸载的时候移除监听
-}, [])
+  if (qrCodeScanResult) {
+    console.log('用户已扫描二维码，请确认');
+  }
+}, [qrCodeScanResult]);
 
-/// 发送授权登录请求，最终的结果会体现在hook里
-ExpoWeChat.sendAuthRequest()
+useEffect(() => {
+  if (qrCodeLoginResult) {
+    if (qrCodeLoginResult.errorCode === 0) {
+      console.log('二维码登录成功!');
+      console.log('授权码:', qrCodeLoginResult.authCode);
+      // 在这里使用authCode向服务器换取token
+    } else {
+      console.log('二维码登录失败:', qrCodeLoginResult.errorCode);
+    }
+  }
+}, [qrCodeLoginResult]);
+
+// 生成登录二维码
+const generateLoginQRCode = async () => {
+  try {
+    const qrCode = await ExpoWeChat.sendAuthByQRRequest({
+      appId: 'wx1234567890',
+      appSecret: 'your_app_secret',
+      scope: 'snsapi_userinfo'
+    });
+    console.log('二维码生成成功');
+  } catch (error) {
+    console.error('二维码生成失败:', error);
+  }
+};
 ```
+
+### 支付示例
+```typescript
+import ExpoWeChat from 'expo-wechat'
+import { useEvent, useEffect } from 'expo'
+
+// 监听支付结果
+const payResult = useEvent(ExpoWeChat, 'onPayResult');
+
+useEffect(() => {
+  if (payResult) {
+    if (payResult.errorCode === 0) {
+      console.log('支付成功!');
+      // 支付成功后的处理逻辑
+    } else {
+      console.log('支付失败:', payResult.errorMessage);
+      // 支付失败后的处理逻辑
+    }
+  }
+}, [payResult]);
+
+// 发起支付
+const handlePay = async () => {
+  try {
+    // 从服务器获取支付参数
+    const payParams = await getPayParamsFromServer();
+    
+    const result = await ExpoWeChat.pay({
+      partnerId: payParams.partnerId,
+      prepayId: payParams.prepayId,
+      nonceStr: payParams.nonceStr,
+      timeStamp: payParams.timeStamp,
+      sign: payParams.sign,
+      package: payParams.package,
+      extraData: payParams.extraData
+    });
+    
+    console.log('支付请求发送结果:', result);
+  } catch (error) {
+    console.error('支付失败:', error);
+  }
+};
+```
+
+### 分享示例
+```typescript
+import ExpoWeChat from 'expo-wechat'
+
+// 分享网页到微信会话
+const shareToWeChat = async () => {
+  try {
+    const result = await ExpoWeChat.shareWebpage({
+      url: 'https://example.com',
+      title: '分享标题',
+      description: '分享描述内容',
+      thumbBase64OrImageUri: 'base64编码的图片或本地图片URI',
+      scene: 'session'
+    });
+    console.log('分享请求发送结果:', result);
+  } catch (error) {
+    console.error('分享失败:', error);
+  }
+};
+```
+
+> 注意：
+> 所有API返回的Promise仅表示调用是否成功发送，不代表最终操作结果。需要通过相应的事件监听获取实际操作结果。
+> `useEvent`是expo提供的一个模块事件监听的工具，你完全可以使用`ExpoWeChat.addEventListener('onAuthResult', (result) => {})`这种语法来监听事件结果，但千万不要忘记在组件卸载时移除事件监听，否则会导致内存泄漏。
 
 # Example
 
@@ -257,7 +668,7 @@ QQ 群：682911244
 
 - [ ] 实现选择发票功能
 - [x] 发布不带支付功能的SDK
-- [ ] 完善文档
+- [x] 完善文档
 
 # 常见问题
 ### 报错 could not find module `ExpoModulesCore` for target '86_64-apple-ios-simulator'; found: arm64-apple-ios-simulator
