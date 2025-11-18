@@ -647,6 +647,7 @@ const shareToWeChat = async () => {
 > 注意：
 > 所有API返回的Promise仅表示调用是否成功发送，不代表最终操作结果。需要通过相应的事件监听获取实际操作结果。
 > `useEvent`是expo提供的一个模块事件监听的工具，你完全可以使用`ExpoWeChat.addEventListener('onAuthResult', (result) => {})`这种语法来监听事件结果，但千万不要忘记在组件卸载时移除事件监听，否则会导致内存泄漏。
+> 调试过程中，可以调用`ExpoWeChat.startLogByLevel()`方法来打开日志工具，但是目前日志打印是存在于原生端，也就是说你需要打开Android Studio用LogCat看日志，iOS则需要打开Xcode。这个目前正在优化中。
 
 # Example
 
@@ -654,7 +655,7 @@ const shareToWeChat = async () => {
 - 克隆本仓库后，在根目录执行`npm i`
 - 在根目录执行`npm run build plugin`，然后按下`ctrl + c`退出命令即可。
 - 进入example文件夹，执行`npm i`安装依赖。
-- 启动之前，请在`.env`文件内配置微信AppId和Key，以及通用链接。
+- 启动之前，请在`.env`文件内配置微信AppId和Key，去`app.json`文件内配置scheme和associatedDomains，切记确保与微信后台配置的一致。
 
 # 鸣谢
 本框架参考了许多[react-native-wechat-lib](https://github.com/little-snow-fox/react-native-wechat-lib)的代码，实现了基本上所有的API的功能，在此基础上，极大的简化了配置流程，并使用了最新的微信SDK，感谢前人！

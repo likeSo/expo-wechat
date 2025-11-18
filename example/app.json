@@ -14,7 +14,15 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "expo.modules.wechat.example"
+      "bundleIdentifier": "expo.modules.wechat.example",
+      "scheme": "请按需要配置为你的Scheme",
+      "associatedDomains": [
+        "这里写你的通用链接，比如applink:xxx.xxx，如果你不是开发者账户，在测试的时候也可以直接删掉这个配置。"
+      ],
+      "infoPlist": {
+        "NSCameraUsageDescription": "相机权限",
+        "NSPhotoLibraryUsageDescription": "相册权限"
+      }
     },
     "android": {
       "adaptiveIcon": {

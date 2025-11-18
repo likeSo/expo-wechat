@@ -27,7 +27,14 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
+          <string>请按需要配置为你的Scheme</string>
           <string>expo.modules.wechat.example</string>
+        </array>
+      </dict>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>exp+expo-wechat-example</string>
         </array>
       </dict>
     </array>
@@ -51,6 +58,10 @@
       <key>NSAllowsLocalNetworking</key>
       <true/>
     </dict>
+    <key>NSCameraUsageDescription</key>
+    <string>相机权限</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>相册权限</string>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>
     <key>UIRequiredDeviceCapabilities</key>
