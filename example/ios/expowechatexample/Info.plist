@@ -46,10 +46,6 @@
       <string>weixinULAPI</string>
       <string>weixinURLParamsAPI</string>
       <string>weixinQRCodePayAPI</string>
-      <string>weixin</string>
-      <string>weixinULAPI</string>
-      <string>weixinURLParamsAPI</string>
-      <string>weixinQRCodePayAPI</string>
     </array>
     <key>LSMinimumSystemVersion</key>
     <string>12.0</string>
