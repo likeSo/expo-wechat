@@ -9,8 +9,8 @@ public class ExpoWechatModule: Module {
     static weak var moduleInstance: ExpoWechatModule?
     private var isApiRegistered = false
     private var logLevel: LogLevel?
-    private var authSDK: WechatAuthSDK?
-    private var authSDKDelegateProxy: WeChatAuthSDKDelegateProxy?
+    fileprivate var authSDK: WechatAuthSDK?
+    fileprivate var authSDKDelegateProxy: WeChatAuthSDKDelegateProxy?
     
     public func definition() -> ModuleDefinition {
 
@@ -33,6 +33,10 @@ public class ExpoWechatModule: Module {
         
         OnDestroy {
             Self.moduleInstance = nil
+            
+            self.authSDK?.stopAuth()
+            self.authSDKDelegateProxy = nil
+            self.authSDK = nil
         }
         
         Property("isRegistered") {
@@ -67,11 +71,12 @@ public class ExpoWechatModule: Module {
                 self.logLevel = `enum`
                 WXApi.startLog(by: `enum`.wxLogLevel) { logInfo in
                     print("ExpoWeChatModule：\(logInfo)")
+                    
                 }
             }
         }
         
-        AsyncFunction("checkUniversalLinkReady") { (promise: Promise) in
+        AsyncFunction("checkUniversalLinkReady") {
 #if DEBUG
             WXApi.checkUniversalLinkReady { step, result in
                 print("微信自检步骤：\(step)，自检成功：\(result.success)，错误信息：\(result.errorInfo)，修复建议：\(result.suggestion)")
@@ -96,6 +101,10 @@ public class ExpoWechatModule: Module {
         AsyncFunction("sendAuthByQRRequest") { (options: AuthByQROptions,
                                                 promise: Promise) in
             if isApiRegistered {
+                if self.authSDK != nil {
+                    self.authSDK?.stopAuth()
+                    self.authSDKDelegateProxy = nil
+                }
                 WeChatSDKUtils.getAccessToken(weiXinId: options.appId,
                                               weiXinSecret: options.appSecret) { [weak self] accessToken in
                     if accessToken != nil {
@@ -108,7 +117,6 @@ public class ExpoWechatModule: Module {
                                                                                sdkTicket: ticket!,
                                                                                timestamp: timestamp)
                                 self?.authSDK = WechatAuthSDK()
-                                self?.authSDK?.stopAuth()
                                 self?.authSDKDelegateProxy = WeChatAuthSDKDelegateProxy()
                                 self?.authSDK?.delegate = self?.authSDKDelegateProxy
                                 
@@ -167,8 +175,8 @@ public class ExpoWechatModule: Module {
                     }
                     
                     let req = SendMessageToWXReq()
-                    req.bText = false
-                    
+                    req.bText = false   
+                    req.message = mediaMessage
                     req.scene = WeChatSDKUtils.getWeChatShareScene(options.scene)
                     
                     WXApi.send(req) { succeed in
@@ -207,9 +215,9 @@ public class ExpoWechatModule: Module {
                 
                 let req = SendMessageToWXReq()
                 req.bText = false
-                
                 req.scene = WeChatSDKUtils.getWeChatShareScene(scene)
                 req.message = mediaMessage
+                
                 WXApi.send(req) { succeed in
                     promise.resolve(succeed)
                 }
@@ -267,6 +275,17 @@ public class ExpoWechatModule: Module {
         }
         
         AsyncFunction("shareVideo") { (options: ShareVideoOptions, promise: Promise) in
+            
+            func sendVideoRequest(mediaMessage: WXMediaMessage, scene: String) {
+                let req = SendMessageToWXReq()
+                req.message = mediaMessage
+                req.bText = false
+                req.scene = WeChatSDKUtils.getWeChatShareScene(scene)
+                WXApi.send(req) { succeed in
+                    promise.resolve(succeed)
+                }
+            }
+            
             if (isApiRegistered) {
                 let videoObject = WXVideoObject()
                 videoObject.videoUrl = options.videoUri
@@ -287,25 +306,21 @@ public class ExpoWechatModule: Module {
                 if (thumbImageData != nil) {
                     mediaMessage.thumbData =
                     ImageCompressUtils.compressImageData(thumbImageData!, toTargetKB: 64)
-                } else {
-                    if (options.videoUri.hasPrefix("file://")) {
-                        let startIndex = options.videoUri.index(options.videoUri.startIndex, offsetBy: 7)
-                        let videoPath = String(options.videoUri[startIndex...])
-                        let fileUri = URL(fileURLWithPath: videoPath)
-                        WeChatSDKUtils.getVideoThumbnail(from: fileUri) { thumbImage in
-                            if thumbImage != nil, let imageData = thumbImage!.jpegData(compressionQuality: 0.7) {
-                                let compressedThumbImage = ImageCompressUtils.compressImageData(imageData, toTargetKB: 64)
-                                mediaMessage.thumbData = compressedThumbImage
-                            }
+                    sendVideoRequest(mediaMessage: mediaMessage, scene: options.scene)
+                } else if (options.videoUri.hasPrefix("file://")) {
+                    let startIndex = options.videoUri.index(options.videoUri.startIndex, offsetBy: 7)
+                    let videoPath = String(options.videoUri[startIndex...])
+                    let fileUri = URL(fileURLWithPath: videoPath)
+                    WeChatSDKUtils.getVideoThumbnail(from: fileUri) { thumbImage in
+                        if thumbImage != nil, let imageData = thumbImage!.jpegData(compressionQuality: 0.7) {
+                            let compressedThumbImage = ImageCompressUtils.compressImageData(imageData, toTargetKB: 64)
+                            mediaMessage.thumbData = compressedThumbImage
                         }
+                        sendVideoRequest(mediaMessage: mediaMessage, scene: options.scene)
                     }
-                }
-                let req = SendMessageToWXReq()
-                req.message = mediaMessage
-                req.bText = false
-                req.scene = WeChatSDKUtils.getWeChatShareScene(options.scene)
-                WXApi.send(req) { succeed in
-                    promise.resolve(succeed)
+                } else {
+                    /// 没提供缩略图，又不是本地视频文件，不拿缩略图了
+                    sendVideoRequest(mediaMessage: mediaMessage, scene: options.scene)
                 }
             } else {
                 promise.reject(apiNotRegisteredException)
@@ -314,6 +329,10 @@ public class ExpoWechatModule: Module {
         
         AsyncFunction("shareWebpage") { (options: ShareWebpageOptions, promise: Promise) in
             if (isApiRegistered) {
+                guard !options.url.isEmpty, let _ = URL(string: options.url) else {
+                    promise.reject("ERR_INVALID_URL", "Webpage URL is invalid")
+                    return
+                }
                 let webpageObject = WXWebpageObject()
                 webpageObject.webpageUrl = options.url
                 if options.extraInfo != nil,
@@ -452,5 +471,7 @@ class WeChatAuthSDKDelegateProxy: NSObject, WechatAuthAPIDelegate {
         ExpoWechatModule.moduleInstance?.sendEvent("onQRCodeAuthResult",
                                                    ["errorCode": errCode,
                                                     "authCode": authCode])
+        ExpoWechatModule.moduleInstance?.authSDK = nil
+        ExpoWechatModule.moduleInstance?.authSDKDelegateProxy = nil
     }
 }

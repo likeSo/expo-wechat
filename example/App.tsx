@@ -92,7 +92,7 @@ export default function App() {
         style: "cancel",
       },
     ]);
-  }, []);
+  }, [initialized]);
 
   const onShareVideo = useCallback(async () => {
     const shareImage = async (source: "camera" | "album") => {
@@ -121,13 +121,13 @@ export default function App() {
     if (!initialized) {
       return;
     }
-    Alert.alert("选择图片来分享", "请选择要分享的图片", [
+    Alert.alert("选择视频来分享", "请选择要分享的视频", [
       {
-        text: "相册选图",
+        text: "相册选视频",
         onPress: () => shareImage("album"),
       },
       {
-        text: "相机拍照",
+        text: "相机拍视频",
         onPress: () => shareImage("camera"),
       },
       {
@@ -135,7 +135,7 @@ export default function App() {
         style: "cancel",
       },
     ]);
-  }, []);
+  }, [initialized]);
 
   const onShareWebpage = useCallback(async () => {
     if (!initialized) {
@@ -146,7 +146,7 @@ export default function App() {
       scene: "timeline",
     });
     console.log("Share to wechat timeline result:", result);
-  }, []);
+  }, [initialized]);
 
   const onShareMiniProgram = useCallback(async () => {
     if (!initialized) {
@@ -159,18 +159,18 @@ export default function App() {
       type: "release",
     });
     console.log("Share to wechat timeline result:", result);
-  }, [miniProgramId, miniProgramPath]);
+  }, [initialized, miniProgramId, miniProgramPath]);
 
-  const onLaunchMiniProgram = useCallback(() => {
+  const onLaunchMiniProgram = useCallback(async () => {
     if (!initialized) {
       return;
     }
-    const result = ExpoWechat.launchMiniProgram({
+    const result = await ExpoWechat.launchMiniProgram({
       id: miniProgramIdToLaunch,
       type: "release",
     });
-    console.log("Share to wechat timeline result:", result);
-  }, [miniProgramIdToLaunch]);
+    console.log("Launch mini program result:", result);
+  }, [initialized, miniProgramIdToLaunch]);
 
   return (
     <ScrollView
@@ -189,6 +189,8 @@ export default function App() {
         {!initialized && (
           <Button title="初始化微信SDK" onPress={initializeSDK} />
         )}
+        <Button onPress={() => ExpoWechat.startLogByLevel("verbose")} title="开启全部日志" />
+        <Button onPress={() => ExpoWechat.checkUniversalLinkReady()} title="启动微信自检（iOS Only）" />
       </Group>
       <Group title="微信登录">
         <Button title="点击登录" onPress={onWeChatLogin} />
@@ -226,14 +228,14 @@ export default function App() {
           style={styles.textInput}
         />
         <TextInput
-          placeholder="小程序ID"
+          placeholder="小程序路径"
           clearButtonMode="while-editing"
-          keyboardType="numeric"
+          keyboardType="default"
           value={miniProgramPath}
           onChangeText={setMiniProgramPath}
           style={styles.textInput}
         />
-        <Button title="点击分享网页到微信" onPress={onShareMiniProgram} />
+        <Button title="点击分享小程序到微信" onPress={onShareMiniProgram} />
       </Group>
       <Group title="启动小程序">
         <TextInput

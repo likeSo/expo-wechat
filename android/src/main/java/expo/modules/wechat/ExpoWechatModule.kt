@@ -68,21 +68,9 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
     var logLevel: LogLevel? = null
     var isApiRegistered = false
 
-    // Each module class must implement the definition function. The definition consists of components
-    // that describes the module's functionality and behavior.
-    // See https://docs.expo.dev/modules/module-api for more details about available components.
     override fun definition() = ModuleDefinition {
-        // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-        // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-        // The module will be accessible from `requireNativeModule('ExpoWechat')` in JavaScript.
         Name("ExpoWechat")
 
-        // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
-        Constants(
-            "PI" to Math.PI
-        )
-
-        // Defines event names that the module can send to JavaScript.
         Events(
             "onQRCodeAuthGotQRCode",
             "onQRCodeAuthUserScanned",
@@ -96,6 +84,13 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
 
         OnCreate {
             moduleInstance = this@ExpoWechatModule
+        }
+
+        OnDestroy {
+            moduleInstance = null
+            api = null
+            wxAppId = null
+            logLevel = null
         }
 
         Property("isRegistered") {
@@ -298,13 +293,14 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
                         thumbBitmap,
                         WeChatSDKUtils.thumbImageSizeKB
                     )
+                    thumbBitmap.recycle()
                 } else {
                     mediaMessage.thumbData = WeChatSDKUtils.compressBitmapToTargetSize(
                         bitmap,
                         WeChatSDKUtils.thumbImageSizeKB
                     )
                 }
-
+                bitmap.recycle()
 
                 req.message = mediaMessage
                 api?.sendReq(
@@ -434,26 +430,30 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
 
         AsyncFunction("shareWebpage") { options: ShareWebpageOptions, promise: Promise ->
             if (api != null) {
-                val webpageObject = WXWebpageObject()
-                webpageObject.webpageUrl = options.url
-                webpageObject.extInfo = options.extraInfo
-                webpageObject.canvasPageXml = options.canvasPageXml
+                if (options.url.isNotEmpty()) {
+                    val webpageObject = WXWebpageObject()
+                    webpageObject.webpageUrl = options.url
+                    webpageObject.extInfo = options.extraInfo
+                    webpageObject.canvasPageXml = options.canvasPageXml
 
-                val mediaMessage = WXMediaMessage()
-                mediaMessage.mediaObject = webpageObject
-                mediaMessage.title = options.title
-                mediaMessage.description = options.description
-                val bitmap = WeChatSDKUtils.getBitmapFromBase64OrUri(options.thumbBase64OrImageUri)
-                if (bitmap != null) {
-                    mediaMessage.thumbData = WeChatSDKUtils.compressBitmapToTargetSize(bitmap, 64)
-                    bitmap.recycle()
-                }
-                val req = SendMessageToWX.Req()
-                req.transaction = "webpage"
-                req.message = mediaMessage
-                req.scene = WeChatSDKUtils.getWeChatShareScene(options.scene)
-                api?.sendReq(req) { p0 ->
-                    promise.resolve(p0)
+                    val mediaMessage = WXMediaMessage()
+                    mediaMessage.mediaObject = webpageObject
+                    mediaMessage.title = options.title
+                    mediaMessage.description = options.description
+                    val bitmap = WeChatSDKUtils.getBitmapFromBase64OrUri(options.thumbBase64OrImageUri)
+                    if (bitmap != null) {
+                        mediaMessage.thumbData = WeChatSDKUtils.compressBitmapToTargetSize(bitmap, 64)
+                        bitmap.recycle()
+                    }
+                    val req = SendMessageToWX.Req()
+                    req.transaction = "webpage"
+                    req.message = mediaMessage
+                    req.scene = WeChatSDKUtils.getWeChatShareScene(options.scene)
+                    api?.sendReq(req) { p0 ->
+                        promise.resolve(p0)
+                    }
+                } else {
+                    promise.reject("ERR_INVALID_URL", "Webpage URL is empty", null)
                 }
             } else {
                 promise.reject(apiNotRegisteredException)

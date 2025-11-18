@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-  <dict/>
+  <dict>
+    <key>com.apple.developer.associated-domains</key>
+    <array>
+      <string>这里写你的通用链接，比如applink:xxx.xxx，如果你不是开发者账户，在测试的时候也可以直接删掉这个配置。</string>
+    </array>
+  </dict>
 </plist>
