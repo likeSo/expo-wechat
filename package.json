@@ -1,7 +1,7 @@
 {
   "name": "expo-wechat",
-  "version": "0.2.1",
-  "description": "React Native expo package for WeChat Open SDK.",
+  "version": "0.2.2",
+  "description": "React Native Expo版本的微信SDK。基本实现了所有的微信官方SDK的功能，包括支付、登录、分享、客服、跳转小程序等。支持安卓和iOS。本框架旨在让你所有原生代码配置都在RN侧以及json文件中进行，真正做到0原生代码配置，充分利用expo的优势来做到简单好用。",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
