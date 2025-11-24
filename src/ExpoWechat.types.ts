@@ -1,14 +1,63 @@
 
+/**
+ * 插件所有事件。
+ */
 export type ExpoWechatModuleEvents = {
+  /**
+   * 二维码登录，获得登录二维码图片回调。
+   */
   onQRCodeAuthGotQRCode: (params: QRCodeAuthGotQRCodePayload) => void;
+  /**
+   * 二维码登录，获得登录结果回调。
+   */
   onQRCodeAuthResult: (params: QRCodeAuthResultPayload) => void;
+  /**
+   * 二维码登录，用户扫描二维码回调。
+   */
   onQRCodeAuthUserScanned: () => void;
+  /**
+   * 从微信打开应用时的消息回调。
+   */
   onShowMessageFromWeChat: (params: ShowMessageFromWeChatPayload) => void;
+  /**
+   * 授权登录结果回调。
+   */
   onAuthResult: (params: AuthResultPayload) => void;
+  /**
+   * 支付结果回调。
+   */
   onPayResult: (params: PayResultPayload) => void;
+  /**
+   * 打开微信小程序结果回调。
+   */
   onLaunchMiniProgramResult: (params: LaunchMiniProgramResultPayload) => void;
+  /**
+   * 日志事件。
+   */
+  onLog: (params: LogPayload) => void;
 };
 
+/**
+ * 微信日志事件。
+ */
+export type LogPayload = {
+  /**
+   * 日志级别。
+   */
+  level: keyof LogLevel;
+  /**
+   * 日志内容。
+   */
+  log: string;
+  /**
+   * 日志原因。主要用于区分微信日志，或者通用链接自检日志。
+   */
+  reason: string;
+}
+
+/**
+ * 二维码登录，获得登录二维码图片事件。
+ */
 export type QRCodeAuthGotQRCodePayload = {
   /**
    * 二维码base64编码的图片数据。
@@ -16,6 +65,9 @@ export type QRCodeAuthGotQRCodePayload = {
   image: string;
 };
 
+/**
+ * 二维码登录，获得登录结果事件。
+ */
 export type QRCodeAuthResultPayload = {
   /**
    * 错误码。0表示授权成功。
@@ -29,25 +81,43 @@ export type QRCodeAuthResultPayload = {
 
 /**
  * 从微信打开应用时的消息。
- * @param openId 微信用户的openId。
- * @param transaction 微信消息的transaction。
- * @param lang 微信消息的语言。
- * @param country 微信消息的国家。
- * @param mediaType 微信消息的媒体类型。
- * @param title 微信消息的标题。
- * @param description 微信消息的描述。
- * @param extraInfo 微信消息的额外信息。这个字段在你分享内容到微信时可以自定义。
- * @param mediaTag 微信消息的媒体标签。
  */
 export type ShowMessageFromWeChatPayload = {
+  /**
+   * 微信用户的openId。
+   */
   openId: string;
+  /**
+   * 微信消息的transaction。
+   */
   transaction: string;
+  /**
+   * 微信消息的语言。
+   */
   lang: string;
+  /**
+   * 微信消息的国家。
+   */
   country: string;
+  /**
+   * 微信消息的媒体类型。
+   */
   mediaType: MessageMediaType;
+  /**
+   * 微信消息的标题。
+   */
   title?: string;
+  /**
+   * 微信消息的描述。
+   */
   description?: string;
+  /**
+   * 微信消息的额外信息。这个字段在你分享内容到微信时可以自定义。
+   */
   extraInfo?: string;
+  /**
+   * 微信消息的媒体标签。
+   */
   mediaTag?: string;
 }
 
@@ -91,7 +161,7 @@ export enum MessageMediaType {
     nativeGamePage = 101,
 }
 /**
- * 微信回调事件通用响应体。
+ * 微信跳回App回调事件通用响应体。
  */
 export type CommonResultPayload = {
   errorCode: ResultErrorCode;
@@ -112,9 +182,11 @@ export enum ResultErrorCode {
 
 /**
  * 微信授权登录结果。
- *
  */
 export type AuthResultPayload = {
+  /**
+   * 授权登录结果的code。
+   */
   code: string;
   state: string;
   url: string;
@@ -153,97 +225,169 @@ export type AuthByQROptions = {
 
 /**
  * 分享图片到微信所需的参数。
- * @param base64OrImageUri 图片内容，可以是本地图片URI，或者base64编码的图片数据。
- * @param scene 要分享的目标场景。
- * @param thumbBase64OrImageUri 缩略图内容，可以是本地图片URI，或者base64编码的图片数据。如果不提供，默认使用base64OrImageUri进行压缩，得到缩略图。
- * @param imageDataHash 图片数据的哈希值。
- * @param miniProgramId 小程序的原始id。
- * @param miniProgramPath 小程序的路径。
  */
 export type ShareImageOptions = {
+  /**
+   * 图片内容，可以是本地图片URI，或者base64编码的图片数据。
+   */
   base64OrImageUri: string
-  scene: ShareScene
+  /**
+   * 分享目标场景。发送到聊天、朋友圈、收藏。
+   */
+  scene: ShareScene;
+  /**
+   * 缩略图内容，可以是本地图片URI，或者base64编码的图片数据。如果不提供，默认使用base64OrImageUri进行压缩，得到缩略图。
+   */
   thumbBase64OrImageUri?: string;
+  /**
+   * 图片数据的哈希值。
+   */
   imageDataHash?: string | null;
+  /**
+   * 小程序的原始id。
+   */
   miniProgramId?: string | null;
+  /**
+   * 小程序的路径。
+   */
   miniProgramPath?: string | null;
 }
 
 /**
  * 分享音乐到微信所需的参数。
- * @param musicWebpageUrl 音乐网页URL。
- * @param musicFileUri 音乐文件URI。
- * @param singerName 歌手名称。
- * @param duration 音乐时长，单位为秒。
- * @param scene 分享目标场景。
- * @param songLyric 歌曲歌词。
- * @param hdAlbumThumbFilePath 安卓Only，高清专辑缩略图文件路径。
- * @param hdAlbumThumbBase64OrImageUri iOS Only，高清专辑缩略图内容，可以是本地图片URI，或者base64编码的图片数据。
- * @param hdAlbumThumbFileHash 高清专辑缩略图文件哈希值。
- * @param albumName 专辑名称。
- * @param musicGenre 音乐风格。
- * @param issueDate 发行日期。
- * @param identification 音乐标识。
- * @param title 标题。
- * @param description 歌曲描述，建议跟singerName保持一致。
- * @param extraMessage 额外信息字段，当微信跳回软件的时候会带上这个字段。
- * @param thumbBase64OrImageUri 缩略图内容，可以是本地图片URI，或者base64编码的图片数据。不得超过64kb。如果超过64kb，会被自动压缩。
  */
 export type ShareMusicOptions = {
-  musicWebpageUrl: string
-  musicFileUri: string
-  singerName: string
-  duration: number
+  /**
+   * 音乐网页URL。
+   */
+  musicWebpageUrl: string;
+  /**
+   * 音乐文件URI。
+   */
+  musicFileUri: string;
+  /**
+   * 歌手名称。
+   */
+  singerName: string;
+  /**
+   * 音乐时长，单位为秒。
+   */
+  duration: number;
+  /**
+   * 分享目标场景。发送到聊天、朋友圈、收藏。
+   */
   scene: ShareScene;
+  /**
+   * 音乐歌词。
+   */
   songLyric?: string;
+  /**
+   * 高清专辑封面图片文件路径。
+   */
   hdAlbumThumbFilePath?: string;
+  /**
+   * 高清专辑封面图片内容，可以是本地图片URI，或者base64编码的图片数据。
+   */
   hdAlbumThumbBase64OrImageUri?: string;
+  /**
+   * 高清专辑封面图片数据的哈希值。
+   */
   hdAlbumThumbFileHash?: string;
+  /**
+   * 专辑名称。
+   */
   albumName?: string;
+  /**
+   * 音乐流派。
+   */
   musicGenre?: string;
+  /**
+   * 发行日期。
+   */
   issueDate?: string;
+  /**
+   * 音乐标识。
+   */
   identification?: string;
+  /**
+   * 标题。
+   */
   title?: string;
+  /**
+   * 音乐描述。
+   */
   description?: string;
+  /**
+   * 额外消息。
+   */
   extraMessage?: string;
+  /**
+   * 缩略图内容，可以是本地图片URI，或者base64编码的图片数据。
+   */
   thumbBase64OrImageUri?: string;
 }
 
 /**
  * 分享视频到微信所需的参数。
- * @param videoUri 视频文件URI。
- * @param scene 分享目标场景。
- * @param lowQualityVideoUri 低质量视频文件URI。用于在低带宽网络环境下使用。
- * @param thumbBase64OrImageUri 缩略图内容，可以是本地图片URI，或者base64编码的图片数据。如果不提供，默认是视频的第一帧的截图。
- * @param title 标题。
- * @param description 视频描述。
  */
 export type ShareVideoOptions = {
+  /**
+   * 视频文件URI。
+   */
   videoUri: string;
+  /**
+   * 分享目标场景。发送到聊天、朋友圈、收藏。
+   */
   scene: ShareScene;
+  /**
+   * 低质量视频文件URI。用于在低带宽网络环境下使用。
+   */
   lowQualityVideoUri?: string;
+  /**
+   * 缩略图内容，可以是本地图片URI，或者base64编码的图片数据。如果不提供，默认是视频的第一帧的截图。
+   */
   thumbBase64OrImageUri?: string;
+  /**
+   * 标题。
+   */
   title?: string;
+  /**
+   * 视频描述。
+   */
   description?: string;
 }
 
 /**
  * 分享网页到微信所需的参数。
- * @param url 网页URL。
- * @param extraInfo 额外信息字段。
- * @param canvasPageXml 画布页面XML。
- * @param scene 分享目标场景。
- * @param title 标题。
- * @param description 网页描述。
- * @param thumbBase64OrImageUri 缩略图内容，可以是本地图片URI，或者base64编码的图片数据。
  */
 export type ShareWebpageOptions = {
+  /**
+   * 网页URL。
+   */
   url: string;
+  /**
+   * 分享目标场景。发送到聊天、朋友圈、收藏。
+   */
   scene: ShareScene;
+  /**
+   * 额外信息字段。
+   */
   extraInfo?: string;
+  /**
+   * 画布页面XML。
+   */
   canvasPageXml?: string;
+  /**
+   * 标题。
+   */
   title?: string;
+  /**
+   * 网页描述。
+   */
   description?: string;
+  /**
+   * 缩略图内容，可以是本地图片URI，或者base64编码的图片数据。
+   */
   thumbBase64OrImageUri?: string;
 };
 
@@ -254,62 +398,112 @@ export type WeChatMiniProgramType = 'release' | 'test' | 'preview'
 
 /**
  * 分享小程序到微信所需的参数。
- * @param webpageUrl 网页URL。
- * @param miniProgramId 小程序的原始id。
- * @param miniProgramPath 小程序的路径。
- * @param withShareTicket 是否携带shareTicket。
- * @param miniProgramType 小程序类型。
- * @param title 标题。
- * @param description 小程序描述。
- * @param thumbBase64OrImageUri 缩略图内容，可以是本地图片URI，或者base64编码的图片数据。
  */
 
 export type ShareMiniProgramOptions = {
+  /**
+   * 网页URL。
+   */
   webpageUrl?: string;
+  /**
+   * 小程序的原始id。
+   */
   id: string;
+  /**
+   * 小程序类型。
+   */
   type: WeChatMiniProgramType;
+  /**
+   * 小程序的路径。
+   */
   path?: string;
+  /**
+   * 分享目标场景。发送到聊天、朋友圈、收藏。
+   */
   scene: ShareScene;
+  /**
+   * 是否携带shareTicket。
+   */
   withShareTicket?: boolean;
+  /**
+   * 标题。
+   */
   title?: string;
+  /**
+   * 小程序描述。
+   */
   description?: string;
+  /**
+   * 缩略图内容，可以是本地图片URI，或者base64编码的图片数据。
+   */
   thumbBase64OrImageUri?: string;
+  /**
+   * 是否禁用转发。
+   */
   disableForward?: boolean;
+  /**
+   * 是否是可更新消息。
+   */
   isUpdatableMessage?: boolean;
+  /**
+   * 是否是保密消息。
+   */
   isSecretMessage?: boolean;
 };
 
 /**
  * 启动微信小程序所需的参数。
- * @param id 小程序的原始id。
- * @param path 小程序的路径。
- * @param type 小程序类型。
- * @param extraData 额外数据。
  */
 export type LaunchMiniProgramOptions = {
+  /**
+   * 小程序的原始id。
+   */
   id: string;
+  /**
+   * 小程序类型。
+   */
   type: WeChatMiniProgramType;
+  /**
+   * 小程序的路径。
+   */
   path?: string;
+  /**
+   * 额外数据。
+   */
   extraData?: string;
 };
 
 /**
  * 微信支付所需的参数。
- * @param partnerId 商户号。
- * @param prepayId 预支付交易会话ID。
- * @param nonceStr 随机字符串。
- * @param timeStamp 时间戳。
- * @param sign 签名。
- * @param package 扩展字段。
- * @param extraData 额外数据。
  */
 export type PayOptions = {
+  /**
+   * 商户号。
+   */
   partnerId: string;
+  /**
+   * 预支付交易会话ID。
+   */
   prepayId: string;
+  /**
+   * 随机字符串。
+   */
   nonceStr: string;
+  /**
+   * 时间戳。
+   */
   timeStamp: number;
+  /**
+   * 签名。
+   */
   sign: string;
+  /**
+   * 扩展字段。
+   */
   package: string;
+  /**
+   * 额外数据。
+   */
   extraData: string;
 }
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useEvent } from "expo";
 import ExpoWechat from "expo-wechat";
 import {
@@ -21,9 +21,18 @@ export default function App() {
   const [miniProgramIdToLaunch, setMiniProgramIdToLaunch] = useState("");
 
   const onAuthResult = useEvent(ExpoWechat, "onAuthResult");
+  const logInfo = useEvent(ExpoWechat, "onLog");
   const wechatAppId = process.env.EXPO_PUBLIC_WECHAT_APP_ID;
   const universalLink = process.env.EXPO_PUBLIC_UNIVERSAL_LINK;
   const isParametersValid = Boolean(wechatAppId) && Boolean(universalLink);
+
+  /// 监听微信日志事件，打印到控制台
+  useEffect(() => {
+    if (logInfo) {
+      logInfo.reason
+      console.log(logInfo);
+    }
+  }, [logInfo]);
 
   const initializeSDK = useCallback(async () => {
     if (!isParametersValid) {
@@ -189,8 +198,17 @@ export default function App() {
         {!initialized && (
           <Button title="初始化微信SDK" onPress={initializeSDK} />
         )}
-        <Button onPress={() => ExpoWechat.startLogByLevel("verbose")} title="开启全部日志" />
-        <Button onPress={() => ExpoWechat.checkUniversalLinkReady()} title="启动微信自检（iOS Only）" />
+        <Button
+          onPress={() => ExpoWechat.startLogByLevel("verbose")}
+          title="开启全部日志"
+        />
+        <Button
+          onPress={() => ExpoWechat.checkUniversalLinkReady()}
+          title="启动微信自检（iOS Only）"
+        />
+        <Text>
+          日志开启后，请在控制台查看，正式发布的时候不要调用这个方法。
+        </Text>
       </Group>
       <Group title="微信登录">
         <Button title="点击登录" onPress={onWeChatLogin} />

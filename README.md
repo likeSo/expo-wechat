@@ -644,10 +644,14 @@ const shareToWeChat = async () => {
 };
 ```
 
+## 调试
+开启日志调试，首先你需要调用`ExpoWeChat.startLogByLevel('verbose')`方法，即可打开全部日志。
+为了将日志打印到JS控制台，你需要监听`onLog`事件，然后将其打印出来即可，具体可以参考example下的`App.tsx`文件。
+
+
 > 注意：
 > 所有API返回的Promise仅表示调用是否成功发送，不代表最终操作结果。需要通过相应的事件监听获取实际操作结果。
-> `useEvent`是expo提供的一个模块事件监听的工具，你完全可以使用`ExpoWeChat.addEventListener('onAuthResult', (result) => {})`这种语法来监听事件结果，但千万不要忘记在组件卸载时移除事件监听，否则会导致内存泄漏。
-> 调试过程中，可以调用`ExpoWeChat.startLogByLevel()`方法来打开日志工具，但是目前日志打印是存在于原生端，也就是说你需要打开Android Studio用LogCat看日志，iOS则需要打开Xcode。这个目前正在优化中。
+> `useEvent`是expo提供的一个模块事件监听的工具，你完全可以使用`ExpoWeChat.addListener('onAuthResult', (result) => {})`这种语法来监听事件结果，但千万不要忘记在组件卸载时移除事件监听，否则会导致内存泄漏。
 
 # Example
 
@@ -656,9 +660,6 @@ const shareToWeChat = async () => {
 - 在根目录执行`npm run build plugin`，然后按下`ctrl + c`退出命令即可。
 - 进入example文件夹，执行`npm i`安装依赖。
 - 启动之前，请在`.env`文件内配置微信AppId和Key，去`app.json`文件内配置scheme和associatedDomains，切记确保与微信后台配置的一致。
-
-# 鸣谢
-本框架参考了许多[react-native-wechat-lib](https://github.com/little-snow-fox/react-native-wechat-lib)的代码，实现了基本上所有的API的功能，在此基础上，极大的简化了配置流程，并使用了最新的微信SDK，感谢前人！
 
 # 联系方式
 本框架积极维护，如有任何问题，欢迎提交issue或者PR。
@@ -690,3 +691,7 @@ QQ 群：682911244
 #### 解决方案2
 expo-router提供了一个API，可以让你拦截所有deep link，并手动控制是否处理。详见[Customizing links](https://docs.expo.dev/router/advanced/native-intent/#rewrite-incoming-native-deep-links)。
 简单来说，你需要新建一个`+native-intent.tsx`文件，按照文档导出一个函数，并根据条件，重定向到你的登录页面即可。
+
+
+# 鸣谢
+本框架参考了许多[react-native-wechat-lib](https://github.com/little-snow-fox/react-native-wechat-lib)的实现，实现了基本上所有的API的功能，在此基础上，极大的简化了配置流程，并使用了最新的微信SDK，感谢前人！

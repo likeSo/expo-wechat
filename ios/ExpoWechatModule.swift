@@ -24,7 +24,8 @@ public class ExpoWechatModule: Module {
             "onAuthResult",
             "onPayResult",
             "onLaunchMiniProgramResult",
-            "onSendMessageToWeChatResult"
+            "onSendMessageToWeChatResult",
+            "onLog"
         )
         
         OnCreate {
@@ -69,17 +70,21 @@ public class ExpoWechatModule: Module {
             let logLevelEnum = LogLevel(rawValue: logLevel)
             if let `enum` = logLevelEnum {
                 self.logLevel = `enum`
-                WXApi.startLog(by: `enum`.wxLogLevel) { logInfo in
-                    print("ExpoWeChatModule：\(logInfo)")
-                    
+                WXApi.startLog(by: `enum`.wxLogLevel) { [weak self] logInfo in
+                    self?.sendEvent("onLog",
+                                    ["level": self?.logLevel?.rawValue ?? "",
+                                     "log": logInfo,
+                                     "reason": "WeChat Log"])
                 }
             }
         }
         
         AsyncFunction("checkUniversalLinkReady") {
 #if DEBUG
-            WXApi.checkUniversalLinkReady { step, result in
-                print("微信自检步骤：\(step)，自检成功：\(result.success)，错误信息：\(result.errorInfo)，修复建议：\(result.suggestion)")
+            WXApi.checkUniversalLinkReady { [weak self] step, result in
+                let statusText = "微信自检步骤：\(step)，自检成功：\(result.success)，错误信息：\(result.errorInfo)，修复建议：\(result.suggestion)"
+                self?.sendEvent("onLog", ["log": statusText,
+                                          "reason": "WeChat universal link checking"])
             }
 #endif
         }
@@ -488,7 +493,6 @@ class WeChatAuthSDKDelegateProxy: NSObject, WechatAuthAPIDelegate {
     }
     
     func onAuthFinish(_ errCode: Int32, authCode: String?) {
-        // TODO: 认证完成后，最好能把实例清空掉
         ExpoWechatModule.moduleInstance?.sendEvent("onQRCodeAuthResult",
                                                    ["errorCode": errCode,
                                                     "authCode": authCode])

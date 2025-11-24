@@ -79,7 +79,8 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
             "onAuthResult",
             "onPayResult",
             "onLaunchMiniProgramResult",
-            "onSendMessageToWeChatResult"
+            "onSendMessageToWeChatResult",
+            "onLog"
         )
 
         OnCreate {
@@ -119,38 +120,47 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
             logLevel = LogLevel.fromString(level)
             api?.setLogImpl(object : ILog {
                 override fun v(p0: String?, p1: String?) {
-                    if (logLevel!!.weight <= LogLevel.VERBOSE.weight) {
-                        Log.v(p0 ?: LOG_TAG, p1 ?: "")
-                    }
+                    sendEvent(
+                        "onLog",
+                        mapOf("log" to p1, "level" to "verbose", "reason" to "WeChat Log")
+                    )
                 }
 
                 override fun d(p0: String?, p1: String?) {
-                    if (logLevel!!.weight <= LogLevel.DEBUG.weight) {
-                        Log.d(p0 ?: LOG_TAG, p1 ?: "")
-                    }
+                    sendEvent(
+                        "onLog",
+                        mapOf("log" to p1, "level" to "debug", "reason" to "WeChat Log")
+                    )
                 }
 
                 override fun i(p0: String?, p1: String?) {
-                    if (logLevel!!.weight <= LogLevel.INFO.weight) {
-                        Log.i(p0 ?: LOG_TAG, p1 ?: "")
-                    }
+                    sendEvent(
+                        "onLog",
+                        mapOf("log" to p1, "level" to "info", "reason" to "WeChat Log")
+                    )
                 }
 
                 override fun w(p0: String?, p1: String?) {
-                    if (logLevel!!.weight <= LogLevel.WARNING.weight) {
-                        Log.w(p0 ?: LOG_TAG, p1 ?: "")
-                    }
+                    sendEvent(
+                        "onLog",
+                        mapOf("log" to p1, "level" to "warning", "reason" to "WeChat Log")
+                    )
                 }
 
                 override fun e(p0: String?, p1: String?) {
-                    if (logLevel!!.weight <= LogLevel.ERROR.weight) {
-                        Log.e(p0 ?: LOG_TAG, p1 ?: "")
-                    }
+                    sendEvent(
+                        "onLog",
+                        mapOf("log" to p1, "level" to "error", "reason" to "WeChat Log")
+                    )
                 }
             })
         }
 
         AsyncFunction("checkUniversalLinkReady") {
+            sendEvent(
+                "onLog",
+                mapOf("log" to "Universal linking is not for android, no checking needed.", "reason" to "WeChat universal link checking")
+            )
             return@AsyncFunction true
         }
 
@@ -440,9 +450,11 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
                     mediaMessage.mediaObject = webpageObject
                     mediaMessage.title = options.title
                     mediaMessage.description = options.description
-                    val bitmap = WeChatSDKUtils.getBitmapFromBase64OrUri(options.thumbBase64OrImageUri)
+                    val bitmap =
+                        WeChatSDKUtils.getBitmapFromBase64OrUri(options.thumbBase64OrImageUri)
                     if (bitmap != null) {
-                        mediaMessage.thumbData = WeChatSDKUtils.compressBitmapToTargetSize(bitmap, 64)
+                        mediaMessage.thumbData =
+                            WeChatSDKUtils.compressBitmapToTargetSize(bitmap, 64)
                         bitmap.recycle()
                     }
                     val req = SendMessageToWX.Req()
