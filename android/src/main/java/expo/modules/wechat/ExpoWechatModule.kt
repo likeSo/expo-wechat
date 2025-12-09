@@ -166,7 +166,7 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
 
         AsyncFunction("getApiVersion") {
             if (api != null) {
-                return@AsyncFunction api!!.wxAppSupportAPI
+                return@AsyncFunction api!!.wxAppSupportAPI.toString()
             } else {
                 throw apiNotRegisteredException
             }

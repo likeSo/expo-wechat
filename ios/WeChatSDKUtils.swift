@@ -53,9 +53,10 @@ struct WeChatSDKUtils {
             task.resume()
         }
     
-    static func getAccessToken(weiXinId: String, weiXinSecret: String, completion: @escaping (String?) -> Void) {
-        let url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential" +
-                            "&appid=$weiXinId&secret=$weiXinSecret"
+    static func getAccessToken(weiXinId: String,
+                               weiXinSecret: String,
+                               completion: @escaping (String?) -> Void) {
+        let url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=\(weiXinId)&secret=\(weiXinSecret)"
         getObjectFromURLAsync(from: url) { result in
             if case .success(let data) = result {
                 if let accessToken = data["access_token"] as? String {
@@ -70,8 +71,7 @@ struct WeChatSDKUtils {
     }
     
     static func getSDKTicket(accessToken: String, completion: @escaping (String?) -> Void) {
-        let url =
-                        "https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=2&access_token=$accessToken"
+        let url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=2&access_token=\(accessToken)"
         getObjectFromURLAsync(from: url) { result in
             if case .success(let data) = result {
                 if let ticket = data["ticket"] as? String {
