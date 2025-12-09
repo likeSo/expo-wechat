@@ -128,6 +128,7 @@ class WeChatSDKUtils {
                 val filePath = base64OrUri.substring(7)
                 val fileStream = FileInputStream(filePath)
                 val bitmap = BitmapFactory.decodeStream(fileStream)
+                fileStream.close()
                 return bitmap
             } else {
                 val bytes = Base64.decode(base64OrUri, Base64.DEFAULT)

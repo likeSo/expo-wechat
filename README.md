@@ -1,11 +1,19 @@
 # expo-wechat
 ![npm](https://img.shields.io/npm/v/expo-wechat-no-pay.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 React Native Expo版本的微信SDK。基本实现了所有的微信官方SDK的功能，包括支付、登录、分享、客服、跳转小程序等。支持安卓和iOS。
 本框架旨在让你所有原生代码配置都在RN侧以及json文件中进行，真正做到0原生代码配置，充分利用expo的优势来做到简单好用。
 
+# 🚀 主要特性
 
-# 安装
+- ✅完整的微信SDK功能。
+- ✅完整的TypeScript支持，完整的代码提示。
+- ✅跨平台支持。同时支持安卓和iOS。在web上你也可以调用，只是不会有任何效果，不会报错。
+- ✅售后保证。在使用过程中遇到任何问题都可以联系我，有Expo相关的技术问题也欢迎交流。
+
+
+# 📦 安装
 ```shell
 npx expo install expo-wechat
 
@@ -13,7 +21,7 @@ npx expo install expo-wechat
 # npx expo install expo-wechat-no-pay
 ```
 
-# 配置
+# 🔧 配置
 
 ## iOS
 iOS需要配置通用链接和URL Scheme。
@@ -72,7 +80,7 @@ iOS需要配置通用链接和URL Scheme。
 ```
 
 
-## 总结
+## 🎫 总结
 配置部分，iOS需要配置URL Scheme和通用链接，安卓需要配置混淆规则。最后需要添加`expo-wechat`的config plugin：
 ```json
 "plugins": [
@@ -85,7 +93,7 @@ iOS需要配置通用链接和URL Scheme。
 
 请注意，由于包含了自定义的原生代码，无法在expo go中直接使用。你应该使用`npx expo run:android`或者`npx expo run:ios`，编译原生app。详情参见官方[DevClient文档](https://docs.expo.dev/versions/latest/sdk/dev-client/)。
 
-# 初始化
+# 📝 初始化
 
 ```typescript
 import ExpoWeChat from 'expo-wechat'
@@ -94,7 +102,7 @@ import ExpoWeChat from 'expo-wechat'
 const result = await ExpoWeChat.registerApp(wechatAppId, universalLink);
 ```
 
-# API文档
+# 📚 API文档
 
 ## 属性
 
@@ -644,7 +652,7 @@ const shareToWeChat = async () => {
 };
 ```
 
-## 调试
+# 🔧 调试
 开启日志调试，首先你需要调用`ExpoWeChat.startLogByLevel('verbose')`方法，即可打开全部日志。
 为了将日志打印到JS控制台，你需要监听`onLog`事件，然后将其打印出来即可，具体可以参考example下的`App.tsx`文件。
 
@@ -653,7 +661,7 @@ const shareToWeChat = async () => {
 > 所有API返回的Promise仅表示调用是否成功发送，不代表最终操作结果。需要通过相应的事件监听获取实际操作结果。
 > `useEvent`是expo提供的一个模块事件监听的工具，你完全可以使用`ExpoWeChat.addListener('onAuthResult', (result) => {})`这种语法来监听事件结果，但千万不要忘记在组件卸载时移除事件监听，否则会导致内存泄漏。
 
-# Example
+# 📱 例子项目
 
 克隆本仓库，并启动Example示例项目的步骤如下
 - 克隆本仓库后，在根目录执行`npm i`
@@ -661,18 +669,17 @@ const shareToWeChat = async () => {
 - 进入example文件夹，执行`npm i`安装依赖。
 - 启动之前，请在`.env`文件内配置微信AppId和Key，去`app.json`文件内配置scheme和associatedDomains，切记确保与微信后台配置的一致。
 
-# 联系方式
-本框架积极维护，如有任何问题，欢迎提交issue或者PR。
-QQ 群：682911244
+# ☎️ 联系方式
+本框架积极维护，如有任何问题，欢迎提交issue或者PR。也欢迎进群交流：682911244。
 
 
-# 线路图
+# 🗺️ 线路图
 
 - [ ] 实现选择发票功能
 - [x] 发布不带支付功能的SDK
 - [x] 完善文档
 
-# 常见问题
+# 🤔 常见问题
 ### 报错 could not find module `ExpoModulesCore` for target '86_64-apple-ios-simulator'; found: arm64-apple-ios-simulator
 以下方案是我们的一些经验，你可以都试一下：
 - 启动Rosetta模拟器。
@@ -693,5 +700,5 @@ expo-router提供了一个API，可以让你拦截所有deep link，并手动控
 简单来说，你需要新建一个`+native-intent.tsx`文件，按照文档导出一个函数，并根据条件，重定向到你的登录页面即可。
 
 
-# 鸣谢
+# 🙏 鸣谢
 本框架参考了许多[react-native-wechat-lib](https://github.com/little-snow-fox/react-native-wechat-lib)的实现，实现了基本上所有的API的功能，在此基础上，极大的简化了配置流程，并使用了最新的微信SDK，感谢前人！
