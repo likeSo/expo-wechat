@@ -38,7 +38,7 @@ iOS需要配置通用链接和URL Scheme。安卓上需要配置混淆规则。�
 
 在`app.json`或`app.config.js`添加如下配置：
 
-```json
+```json5
 "expo": {
   "scheme": [
     // 微信开放平台给你的微信id，类似于wx1234567890这种格式的。
