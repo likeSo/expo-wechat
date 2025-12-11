@@ -23,35 +23,50 @@ npx expo install expo-wechat
 
 # 🔧 配置
 
-## iOS
-iOS需要配置通用链接和URL Scheme。
+iOS需要配置通用链接和URL Scheme。安卓上需要配置混淆规则。这些都可以通过`app.json`或`app.config.js`来配置。
 
 > 什么是URL Scheme和通用链接？简单来说这就是iOS上微信授权完成后，跳回你的app的两种途径。
 > URL Scheme用于给你的应用注册一个独一无二的链接，使别的软件可以通过这个链接直接唤起你的App。
 > 是微信回调起你的App的保底方案，当通用链接唤起失败后，微信会尝试使用URL Scheme来唤起你的App。这个URL Scheme就是微信开放平台给你的微信id，类似于`wx1234567890`这种格式的。
-> 
+>
 > 通用链接是微信首推的唤起微信和你的App的方案，当通用链接没有配置好的时候，才会回退到URL Scheme方案。
 > 通用链接允许你向苹果注册一个URL地址，当访问这个地址的时候，系统优先唤起你的App，而不是网页。简单来说，它是一种比URL Scheme更好的唤起App的解决方案。
+>
+> 通用链接如何生成，以及如何向苹果注册，也许你需要参照一下[苹果官方文档](https://developer.apple.com/documentation/xcode/supporting-associated-domains)。
+> 
+> 如果对于`app.json`和`app.config.js`有疑问，请参阅[Expo Configure with app config 文档](https://docs.expo.dev/workflow/configuration/)。其实都是一个东西，只是后者能让你写JS代码，更灵活一些。
 
-使用Expo官方提供的方式来添加URL Scheme，以及配置通用链接。在`app.json`或`app.config.js`中添加以下字段：
+在`app.json`或`app.config.js`添加如下配置：
+
 ```json
-"ios": {
-    "scheme": [
-        "wx1234567890"
-    ],
+"expo": {
+  "scheme": [
+    // 微信开放平台给你的微信id，类似于wx1234567890这种格式的。
+    "wx1234567890"
+  ],
+  "ios": {
     "associatedDomains": [
+      // 你的通用链接地址，前缀applinks是固定的，需要保证后边的域名和苹果，以及微信上注册的一致。
         "applinks:example.com"
     ]
+  },
+  "plugins": [
+    [
+      // expo-build-properties是另外一个expo官方的插件，它能让你自定义很多构建阶段的参数，包括自定义混淆规则和maven仓库等。
+      // 记得先npx expo install expo-build-properties
+      "expo-build-properties",
+      {
+        "android": {
+          "extraProguardRules": "把下面的混淆规则放到这里",
+        },
+      }
+    ],
+    "expo-wechat"
+  ]
 }
+
 ```
-这里的通用链接如何生成，以及如何向苹果注册，也许你需要参照一下[苹果官方文档](https://developer.apple.com/documentation/xcode/supporting-associated-domains)。
 
-> URL Scheme白名单，也就是`LSApplicationQueriesSchemes`字段，因为是固定不变的，插件已经自动帮你配置好了。
-
-## 安卓
-
-在安卓上，你需要配置微信的混淆规则，以免打包时将微信的框架代码排除在外而报错。
-微信所需的proguard混淆规则内容如下：
 ```text
 -keep class com.tencent.mm.opensdk.** {
     *;
@@ -66,32 +81,8 @@ iOS需要配置通用链接和URL Scheme。
 }
 ```
 
-需要利用[Expo BuildProperties](https://docs.expo.dev/versions/latest/sdk/build-properties/)，在`app.json`或`app.config.js`中添加以下内容：
-```json
-    "plugins": [
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "extraProguardRules": "把以上规则内容放到这里",
-          },
-        }
-      ]
-```
-
-
-## 🎫 总结
-配置部分，iOS需要配置URL Scheme和通用链接，安卓需要配置混淆规则。最后需要添加`expo-wechat`的config plugin：
-```json
-"plugins": [
-    "expo-wechat"
-]
-```
-> 注意这里的plugins对象跟上面的expo-build-properties的是同一个对象。
-> 
-这些是全部的配置项了，都可以通过expo的`app.json`或`app.config.js`来完成，配置部分完成后，就可以正常使用微信SDK了。
-
 请注意，由于包含了自定义的原生代码，无法在expo go中直接使用。你应该使用`npx expo run:android`或者`npx expo run:ios`，编译原生app。详情参见官方[DevClient文档](https://docs.expo.dev/versions/latest/sdk/dev-client/)。
+
 
 # 📝 初始化
 
