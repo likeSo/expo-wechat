@@ -9,11 +9,11 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "expo": "~53.0.9",
-    "react": "19.0.0",
-    "react-native": "0.79.2",
+    "expo": "~53.0.25",
+    "expo-dev-client": "~5.2.4",
     "expo-image-picker": "~16.1.4",
-    "expo-dev-client": "~5.2.4"
+    "react": "19.0.0",
+    "react-native": "0.79.6"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
