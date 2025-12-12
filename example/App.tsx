@@ -17,6 +17,7 @@ export default function App() {
   const [textToShare, setTextToShare] = useState("");
   const [miniProgramId, setMiniProgramId] = useState("");
   const [miniProgramPath, setMiniProgramPath] = useState("");
+  const [imageUriToShare, setImageUriToShare] = useState("");
 
   const [miniProgramIdToLaunch, setMiniProgramIdToLaunch] = useState("");
 
@@ -29,7 +30,7 @@ export default function App() {
   /// 监听微信日志事件，打印到控制台
   useEffect(() => {
     if (logInfo) {
-      logInfo.reason
+      // logInfo.log是日志内容;
       console.log(logInfo);
     }
   }, [logInfo]);
@@ -103,8 +104,23 @@ export default function App() {
     ]);
   }, [initialized]);
 
+  const onShareImageFromUri = useCallback(async () => {
+    if (!initialized) {
+      return;
+    }
+    if (!imageUriToShare) {
+      alert("请输入要分享的图片URI！");
+      return;
+    }
+    const result = await ExpoWechat.shareImage({
+      base64OrImageUri: imageUriToShare,
+      scene: "timeline",
+    });
+    console.log("Share to wechat timeline result:", result);
+  }, [initialized, imageUriToShare]);
+
   const onShareVideo = useCallback(async () => {
-    const shareImage = async (source: "camera" | "album") => {
+    const shareVideo = async (source: "camera" | "album") => {
       let video: ImagePicker.ImagePickerResult;
       if (source === "camera") {
         video = await ImagePicker.launchCameraAsync({
@@ -133,11 +149,11 @@ export default function App() {
     Alert.alert("选择视频来分享", "请选择要分享的视频", [
       {
         text: "相册选视频",
-        onPress: () => shareImage("album"),
+        onPress: () => shareVideo("album"),
       },
       {
         text: "相机拍视频",
-        onPress: () => shareImage("camera"),
+        onPress: () => shareVideo("camera"),
       },
       {
         text: "取消",
@@ -229,6 +245,13 @@ export default function App() {
       </Group>
       <Group title="分享图片">
         <Button title="点击选择图片并分享" onPress={onShareImage} />
+        <TextInput
+          placeholder="请输入要分享到微信的图片URI"
+          value={imageUriToShare}
+          onChangeText={setImageUriToShare}
+          style={styles.textInput}
+        />
+        <Button title="点击分享图片" onPress={onShareImageFromUri} />
       </Group>
       <Group title="分享视频">
         <Button title="点击选择视频并分享" onPress={onShareVideo} />

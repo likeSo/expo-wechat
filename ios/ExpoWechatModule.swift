@@ -73,8 +73,7 @@ public class ExpoWechatModule: Module {
                 WXApi.startLog(by: `enum`.wxLogLevel) { [weak self] logInfo in
                     self?.sendEvent("onLog",
                                     ["level": self?.logLevel?.rawValue ?? "",
-                                     "log": logInfo,
-                                     "reason": "WeChat Log"])
+                                     "log": logInfo])
                 }
             }
         }
@@ -83,8 +82,7 @@ public class ExpoWechatModule: Module {
 #if DEBUG
             WXApi.checkUniversalLinkReady { [weak self] step, result in
                 let statusText = "微信自检步骤：\(step)，自检成功：\(result.success)，错误信息：\(result.errorInfo)，修复建议：\(result.suggestion)"
-                self?.sendEvent("onLog", ["log": statusText,
-                                          "reason": "WeChat universal link checking"])
+                self?.sendEvent("onLog", ["log": statusText])
             }
 #endif
         }

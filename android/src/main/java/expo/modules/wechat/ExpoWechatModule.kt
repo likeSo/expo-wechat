@@ -122,35 +122,35 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
                 override fun v(p0: String?, p1: String?) {
                     sendEvent(
                         "onLog",
-                        mapOf("log" to p1, "level" to "verbose", "reason" to "WeChat Log")
+                        mapOf("log" to p1, "level" to "verbose")
                     )
                 }
 
                 override fun d(p0: String?, p1: String?) {
                     sendEvent(
                         "onLog",
-                        mapOf("log" to p1, "level" to "debug", "reason" to "WeChat Log")
+                        mapOf("log" to p1, "level" to "debug")
                     )
                 }
 
                 override fun i(p0: String?, p1: String?) {
                     sendEvent(
                         "onLog",
-                        mapOf("log" to p1, "level" to "info", "reason" to "WeChat Log")
+                        mapOf("log" to p1, "level" to "info")
                     )
                 }
 
                 override fun w(p0: String?, p1: String?) {
                     sendEvent(
                         "onLog",
-                        mapOf("log" to p1, "level" to "warning", "reason" to "WeChat Log")
+                        mapOf("log" to p1, "level" to "warning")
                     )
                 }
 
                 override fun e(p0: String?, p1: String?) {
                     sendEvent(
                         "onLog",
-                        mapOf("log" to p1, "level" to "error", "reason" to "WeChat Log")
+                        mapOf("log" to p1, "level" to "error")
                     )
                 }
             })
@@ -159,7 +159,7 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
         AsyncFunction("checkUniversalLinkReady") {
             sendEvent(
                 "onLog",
-                mapOf("log" to "Universal linking is not for android, no checking needed.", "reason" to "WeChat universal link checking")
+                mapOf("log" to "Universal linking is not for android, no checking needed.")
             )
             return@AsyncFunction true
         }
@@ -196,52 +196,61 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
         AsyncFunction("sendAuthByQRRequest") Coroutine { options: AuthByQROptions ->
             if (api != null) {
 
-                val accessToken = WeChatSDKUtils.getAccessToken(options.appId, options.appSecret);
-                if (accessToken != null) {
-                    val ticket = WeChatSDKUtils.getSDKTicket(accessToken)
-                    if (ticket != null) {
-                        val nonceString = WeChatSDKUtils.generateObjectId()
-                        val timestamp = System.currentTimeMillis().toString()
-                        val signature =
-                            WeChatSDKUtils.createSignature(
-                                options.appId,
-                                nonceString,
-                                ticket,
-                                timestamp
+                try {
+                    val accessToken =
+                        WeChatSDKUtils.getAccessToken(options.appId, options.appSecret);
+                    if (accessToken != null) {
+                        val ticket = WeChatSDKUtils.getSDKTicket(accessToken)
+                        if (ticket != null) {
+                            val nonceString = WeChatSDKUtils.generateObjectId()
+                            val timestamp = System.currentTimeMillis().toString()
+                            val signature =
+                                WeChatSDKUtils.createSignature(
+                                    options.appId,
+                                    nonceString,
+                                    ticket,
+                                    timestamp
+                                )
+                            val oauth = DiffDevOAuthFactory.getDiffDevOAuth();
+                            val result = oauth.auth(
+                                options.appId, options.scope, nonceString, timestamp, signature,
+                                object : OAuthListener {
+                                    override fun onAuthGotQrcode(p0: String?, p1: ByteArray?) {
+                                        val base64 = Base64.encodeToString(p1, Base64.DEFAULT)
+                                        sendEvent("onQRCodeAuthGotQRCode", mapOf("image" to base64))
+                                    }
+
+                                    override fun onQrcodeScanned() {
+                                        sendEvent("onQRCodeAuthUserScanned")
+                                    }
+
+                                    override fun onAuthFinish(p0: OAuthErrCode?, p1: String?) {
+                                        sendEvent(
+                                            "onQRCodeAuthResult",
+                                            mapOf("errorCode" to p0, "authCode" to p1)
+                                        )
+                                    }
+                                })
+                            return@Coroutine result
+                        } else {
+                            throw CodedException(
+                                "ERR_TICKET",
+                                "Cannot get wechat ticket, please check networking log to find out why",
+                                null
                             )
-                        val oauth = DiffDevOAuthFactory.getDiffDevOAuth();
-                        val result = oauth.auth(
-                            options.appId, options.scope, nonceString, timestamp, signature,
-                            object : OAuthListener {
-                                override fun onAuthGotQrcode(p0: String?, p1: ByteArray?) {
-                                    val base64 = Base64.encodeToString(p1, Base64.DEFAULT)
-                                    sendEvent("onQRCodeAuthGotQRCode", mapOf("image" to base64))
-                                }
-
-                                override fun onQrcodeScanned() {
-                                    sendEvent("onQRCodeAuthUserScanned")
-                                }
-
-                                override fun onAuthFinish(p0: OAuthErrCode?, p1: String?) {
-                                    sendEvent(
-                                        "onQRCodeAuthResult",
-                                        mapOf("errorCode" to p0, "authCode" to p1)
-                                    )
-                                }
-                            })
-                        return@Coroutine result
+                        }
                     } else {
                         throw CodedException(
-                            "ERR_TICKET",
-                            "Cannot get wechat ticket, please check networking log to find out why",
+                            "ERR_ACCESS_TOKEN",
+                            "Cannot get wechat access token, please check networking log to find out why",
                             null
                         )
                     }
-                } else {
+                } catch (e: Exception) {
                     throw CodedException(
-                        "ERR_ACCESS_TOKEN",
-                        "Cannot get wechat access token, please check networking log to find out why",
-                        null
+                        "ERR_NO_REQUIRED_PARAM",
+                        "Cannot get required params such as token and ticket, please file an issue with this exception",
+                        e
                     )
                 }
             } else {
@@ -270,7 +279,7 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
             }
         }
 
-        AsyncFunction("shareImage") { options: ShareImageOptions, promise: Promise ->
+        AsyncFunction("shareImage") Coroutine { options: ShareImageOptions ->
             if (api != null) {
 
                 val mediaMessage = WXMediaMessage()
@@ -281,14 +290,11 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
 
                 val bitmap = WeChatSDKUtils.getBitmapFromBase64OrUri(options.base64OrImageUri)
                 if (bitmap == null) {
-                    promise.reject(
-                        CodedException(
-                            "ERR_NO_IMAGE_FOUND",
-                            "Please provide a valid image data",
-                            null
-                        )
+                    throw CodedException(
+                        "ERR_NO_IMAGE_FOUND",
+                        "Please provide a valid image data",
+                        null
                     )
-                    return@AsyncFunction
                 }
                 val imageObject = WXImageObject(bitmap)
                 imageObject.imgDataHash = options.imageDataHash
@@ -313,11 +319,9 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
                 bitmap.recycle()
 
                 req.message = mediaMessage
-                api?.sendReq(
-                    req
-                ) { p0 -> promise.resolve(p0) }
+                return@Coroutine api!!.sendReqSuspend(req)
             } else {
-                promise.reject(apiNotRegisteredException)
+                throw apiNotRegisteredException
             }
         }
 
@@ -359,7 +363,7 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
             }
         }
 
-        AsyncFunction("shareMusic") { options: ShareMusicOptions, promise: Promise ->
+        AsyncFunction("shareMusic") Coroutine { options: ShareMusicOptions ->
             if (api != null) {
                 val musicObject = WXMusicVideoObject()
                 musicObject.musicUrl = options.musicWebpageUrl
@@ -390,16 +394,14 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
                 req.transaction = "musicVideo"
                 req.message = mediaMessage
                 req.scene = WeChatSDKUtils.getWeChatShareScene(options.scene)
-                api?.sendReq(req) { p0 ->
-                    promise.resolve(p0)
-                }
+                return@Coroutine api!!.sendReqSuspend(req)
 
             } else {
-                promise.reject(apiNotRegisteredException)
+                throw apiNotRegisteredException
             }
         }
 
-        AsyncFunction("shareVideo") { options: ShareVideoOptions, promise: Promise ->
+        AsyncFunction("shareVideo") Coroutine { options: ShareVideoOptions ->
             if (api != null) {
                 val videoObject = WXVideoObject()
                 videoObject.videoUrl = options.videoUri
@@ -430,15 +432,13 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
                 req.transaction = "video"
                 req.message = mediaMessage
                 req.scene = WeChatSDKUtils.getWeChatShareScene(options.scene)
-                api?.sendReq(req) { p0 ->
-                    promise.resolve(p0)
-                }
+                return@Coroutine api!!.sendReqSuspend(req)
             } else {
-                promise.reject(apiNotRegisteredException)
+                throw apiNotRegisteredException
             }
         }
 
-        AsyncFunction("shareWebpage") { options: ShareWebpageOptions, promise: Promise ->
+        AsyncFunction("shareWebpage") Coroutine { options: ShareWebpageOptions ->
             if (api != null) {
                 if (options.url.isNotEmpty()) {
                     val webpageObject = WXWebpageObject()
@@ -461,18 +461,16 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
                     req.transaction = "webpage"
                     req.message = mediaMessage
                     req.scene = WeChatSDKUtils.getWeChatShareScene(options.scene)
-                    api?.sendReq(req) { p0 ->
-                        promise.resolve(p0)
-                    }
+                    return@Coroutine api!!.sendReqSuspend(req)
                 } else {
-                    promise.reject("ERR_INVALID_URL", "Webpage URL is empty", null)
+                    throw CodedException("ERR_INVALID_URL", "Webpage URL is empty", null)
                 }
             } else {
-                promise.reject(apiNotRegisteredException)
+                throw apiNotRegisteredException
             }
         }
 
-        AsyncFunction("shareMiniProgram") { options: ShareMiniProgramOptions, promise: Promise ->
+        AsyncFunction("shareMiniProgram") Coroutine { options: ShareMiniProgramOptions ->
             if (api != null) {
                 val miniProgramObject = WXMiniProgramObject()
                 miniProgramObject.webpageUrl = options.webpageUrl
@@ -499,11 +497,9 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
                 req.transaction = "webpage"
                 req.message = mediaMessage
                 req.scene = WeChatSDKUtils.getWeChatShareScene(options.scene)
-                api?.sendReq(req) { p0 ->
-                    promise.resolve(p0)
-                }
+                return@Coroutine api!!.sendReqSuspend(req)
             } else {
-                promise.reject(apiNotRegisteredException)
+                throw apiNotRegisteredException
             }
         }
 

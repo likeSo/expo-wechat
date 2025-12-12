@@ -11,9 +11,15 @@ import org.json.JSONObject
 import java.net.URL
 import java.security.MessageDigest
 import androidx.core.graphics.scale
+import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelmsg.WXMiniProgramObject
 import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
+import java.net.HttpURLConnection
+import com.tencent.mm.opensdk.openapi.IWXAPI
+import com.tencent.mm.opensdk.openapi.SendReqCallback
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class WeChatSDKUtils {
     companion object {
@@ -29,8 +35,7 @@ class WeChatSDKUtils {
                     val jsonResponse = JSONObject(responseText)
                     jsonResponse.getString("access_token")
                 } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
+                    throw e
                 }
             }
         }
@@ -44,13 +49,11 @@ class WeChatSDKUtils {
                     val response = URL(url).readText()
                     JSONObject(response).getString("ticket")
                 } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
+                    throw e
                 }
             }
         }
 
-        // 2. 创建签名 (使用Java原生SHA1)
         fun createSignature(
             weiXinId: String,
             nonceStr: String,
@@ -94,8 +97,7 @@ class WeChatSDKUtils {
                         "unionid" to userJson.optString("unionid")
                     )
                 } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
+                    throw e
                 }
             }
         }
@@ -121,21 +123,73 @@ class WeChatSDKUtils {
             }
         }
 
-        fun getBitmapFromBase64OrUri(base64OrUri: String?): Bitmap? {
-            if (base64OrUri.isNullOrEmpty()) return null
-            val isFileUri = base64OrUri.startsWith("file://")
-            if (isFileUri) {
-                val filePath = base64OrUri.substring(7)
-                val fileStream = FileInputStream(filePath)
-                val bitmap = BitmapFactory.decodeStream(fileStream)
-                fileStream.close()
-                return bitmap
-            } else {
-                val bytes = Base64.decode(base64OrUri, Base64.DEFAULT)
-                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                return bitmap
+        suspend fun getBitmapFromBase64OrUri(source: String?): Bitmap? = withContext(Dispatchers.IO) {
+            if (source.isNullOrBlank()) return@withContext null
+
+            try {
+                when {
+                    source.startsWith("http://") || source.startsWith("https://") -> {
+                        return@withContext loadBitmapFromNetwork(source)
+                    }
+                    source.startsWith("file://") -> {
+                        return@withContext loadBitmapFromFile(source)
+                    }
+                    source.startsWith("content://") -> {
+                        // TODO: 安卓URI读取
+                        return@withContext null
+                    }
+                    else -> {
+                        return@withContext loadBitmapFromBase64(source)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return@withContext null
             }
         }
+
+        // 从网络下载图片
+        private fun loadBitmapFromNetwork(urlString: String): Bitmap? {
+            var conn: HttpURLConnection? = null
+            try {
+                val url = URL(urlString)
+                conn = url.openConnection() as HttpURLConnection
+                conn.apply {
+                    connectTimeout = 15_000
+                    readTimeout = 15_000
+                    requestMethod = "GET"
+                    doInput = true
+                    // 可选：处理 302/301 重定向
+                    instanceFollowRedirects = true
+                }
+                conn.connect()
+
+                if (conn.responseCode == HttpURLConnection.HTTP_OK) {
+                    conn.inputStream.use { inputStream ->
+                        return BitmapFactory.decodeStream(inputStream)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                conn?.disconnect()
+            }
+            return null
+        }
+
+        // 本地 file://
+        private fun loadBitmapFromFile(fileUri: String): Bitmap? {
+            return FileInputStream(fileUri.removePrefix("file://")).use { inputStream ->
+                BitmapFactory.decodeStream(inputStream)
+            }
+        }
+
+        // Base64
+        private fun loadBitmapFromBase64(base64: String): Bitmap? {
+            val bytes = Base64.decode(base64, Base64.DEFAULT)
+            return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        }
+
 
         fun compressBitmapToTargetSize(bitmap: Bitmap, targetSizeKB: Int): ByteArray {
             val outputStream = ByteArrayOutputStream()
@@ -184,5 +238,16 @@ class WeChatSDKUtils {
                 }
             }
         }
+    }
+}
+
+/// 将sendReq封装成协程
+suspend fun IWXAPI.sendReqSuspend(req: BaseReq): Boolean = suspendCoroutine { cont ->
+    val callback = SendReqCallback { p0 -> cont.resume(p0) }
+
+    val sent = this.sendReq(req, callback)
+
+    if (!sent) {
+        cont.resume(false)
     }
 }

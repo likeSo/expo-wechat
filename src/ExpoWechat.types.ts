@@ -49,10 +49,6 @@ export type LogPayload = {
    * 日志内容。
    */
   log: string;
-  /**
-   * 日志原因。主要用于区分微信日志，或者通用链接自检日志。
-   */
-  reason: string;
 }
 
 /**

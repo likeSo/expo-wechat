@@ -225,7 +225,7 @@ shareImage(options: ShareImageOptions): Promise<boolean>
 **参数：**
 ```typescript
 interface ShareImageOptions {
-  base64OrImageUri: string;           // 图片内容（本地URI或base64）
+  base64OrImageUri: string;           // 图片内容（URI或base64）
   scene: ShareScene;                  // 分享场景
   thumbBase64OrImageUri?: string;     // 缩略图内容（可选）
   imageDataHash?: string | null;      // 图片哈希值（可选）
@@ -248,7 +248,7 @@ shareFile(
 分享文件到微信。
 
 **参数：**
-- `base64OrFileUri`: 文件内容（本地URI或base64）
+- `base64OrFileUri`: 文件内容（URI或base64）
 - `title`: 文件标题
 - `scene`: 分享目标场景
 
@@ -633,7 +633,7 @@ const shareToWeChat = async () => {
       url: 'https://example.com',
       title: '分享标题',
       description: '分享描述内容',
-      thumbBase64OrImageUri: 'base64编码的图片或本地图片URI',
+      thumbBase64OrImageUri: 'base64编码的图片或图片URI',
       scene: 'session'
     });
     console.log('分享请求发送结果:', result);
