@@ -2,12 +2,16 @@
 ![npm](https://img.shields.io/npm/v/expo-wechat.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-React Native Expo版本的微信SDK。基本实现了所有的微信官方SDK的功能，包括支付、登录、分享、客服、跳转小程序等。支持安卓和iOS。
-本框架旨在让你所有原生代码配置都在RN侧以及json文件中进行，真正做到0原生代码配置，充分利用expo的优势来做到简单好用。
+React Native Expo版本的微信SDK。
+您可以基于此框架实现微信登录、微信支付、分享到微信、打开微信小程序，唤起客服聊天等功能。
+WeChat SDK for React Native Expo.
+You can implement WeChat login, WeChat Pay, sharing to WeChat, opening WeChat Mini Programs, and launching customer service chat based on this framework.
+
 
 # 🚀 主要特性
 
 - ✅完整的微信SDK功能。
+- ✅零原生代码配置。无需打开原生项目，无需修改原生代码，所有配置项均在`app.json`中完成。
 - ✅完整的TypeScript支持，完整的代码提示。
 - ✅跨平台支持。同时支持安卓和iOS。在web上你也可以调用，只是不会有任何效果，不会报错。
 - ✅售后保证。在使用过程中遇到任何问题都可以联系我，有Expo相关的技术问题也欢迎交流。
