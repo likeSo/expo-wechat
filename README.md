@@ -430,6 +430,18 @@ sendSubscribeMessage(
 
 **返回值：** `Promise<boolean>` - 发送请求是否成功
 
+### openWebView
+```typescript
+openWebView(url: string): Promise<boolean>
+```
+
+在微信内置 WebView 中打开指定链接。
+
+**参数：**
+- `url`: 要打开的链接，建议使用有效的 `http(s)` URL
+
+**返回值：** `Promise<boolean>` - 打开请求是否发送成功
+
 ## 事件监听
 
 调用API返回的Promise仅仅代表调用的成功与否，不代表最终的微信返回结果。对于需要观测结果的API，应当使用事件监听的方式来实现：

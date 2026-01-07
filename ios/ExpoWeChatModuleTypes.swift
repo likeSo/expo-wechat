@@ -267,3 +267,17 @@ enum LogLevel: String, Comparable {
         return lhs.weight <= rhs.weight
     }
 }
+
+
+struct ChooseInvoiceOptions: Record {
+    @Field
+    var appId: String = ""
+    @Field
+    var timestamp: Date = Date.now
+    @Field
+    var signType: String?
+    @Field
+    var cardSign: String?
+    @Field
+    var nonceStr: String?
+}

@@ -129,6 +129,12 @@ declare class ExpoWechatModule extends NativeModule<ExpoWechatModuleEvents> {
    * 微信支付
    */
   pay(options: PayOptions): Promise<boolean>;
+
+  /**
+   * 打开微信WebView。返回打开结果。
+   * @param url 要打开的URL。
+   */
+  openWebView(url: string): Promise<boolean>;
 }
 
 export default requireNativeModule<ExpoWechatModule>("ExpoWechat");
