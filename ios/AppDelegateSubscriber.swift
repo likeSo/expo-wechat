@@ -57,6 +57,8 @@ public class AppDelegateSubscriber: ExpoAppDelegateSubscriber, WXApiDelegate {
             payload["lang"] = sendMsgResp.lang
             payload["country"] = sendMsgResp.country
             ExpoWechatModule.moduleInstance?.sendEvent("onSendMessageToWeChatResult", payload)
+        } else if let chooseInvoiceResp = resp as? WXChooseInvoiceResp {
+            
         }
     }
 }

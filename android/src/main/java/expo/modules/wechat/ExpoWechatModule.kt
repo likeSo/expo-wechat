@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.util.Log
+import android.util.Patterns
 import android.util.Property
 import androidx.core.content.FileProvider
 import com.tencent.mm.opensdk.constants.ConstantsAPI
@@ -13,6 +14,7 @@ import com.tencent.mm.opensdk.diffdev.OAuthErrCode
 import com.tencent.mm.opensdk.diffdev.OAuthListener
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
+import com.tencent.mm.opensdk.modelbiz.OpenWebview
 import com.tencent.mm.opensdk.modelbiz.SubscribeMessage
 import com.tencent.mm.opensdk.modelbiz.WXLaunchMiniProgram
 import com.tencent.mm.opensdk.modelbiz.WXLaunchMiniProgramWithToken
@@ -545,6 +547,32 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
                 req.reserved = reserved
                 api?.sendReq(req) { p0 ->
                     promise.resolve(p0)
+                }
+            } else {
+                promise.reject(apiNotRegisteredException)
+            }
+        }
+
+        AsyncFunction("chooseInvoice") {
+
+        }
+
+        AsyncFunction("openWebView") { url: String, promise: Promise ->
+            if (api != null) {
+                if (Patterns.WEB_URL.matcher(url).matches()) {
+                    val req = OpenWebview.Req()
+                    req.url = url
+                    api?.sendReq(req) { p0 ->
+                        promise.resolve(p0)
+                    }
+                } else {
+                    promise.reject(
+                        CodedException(
+                            "ERR_INVALID_URL",
+                            "Please provide a valid url string",
+                            null
+                        )
+                    )
                 }
             } else {
                 promise.reject(apiNotRegisteredException)

@@ -454,6 +454,39 @@ public class ExpoWechatModule: Module {
                 promise.reject(apiNotRegisteredException)
             }
         }
+        
+        AsyncFunction("chooseInvoice") { (options: ChooseInvoiceOptions, promise: Promise) in
+            if (isApiRegistered) {
+                let req = WXChooseInvoiceReq()
+                req.appID = options.appId
+                req.timeStamp = UInt32(options.timestamp.timeIntervalSince1970)
+                req.signType = options.signType ?? "SHA1"
+                req.cardSign = options.cardSign ?? ""
+                req.nonceStr = options.nonceStr ?? ""
+                WXApi.send(req) { succeed in
+                    promise.resolve(succeed)
+                }
+            } else {
+                promise.reject(apiNotRegisteredException)
+            }
+        }
+
+        AsyncFunction("openWebView") { (url: String, promise: Promise) in
+            if (isApiRegistered) {
+                if let urlObject = URL(string: url) {
+                    let req = OpenWebviewReq()
+                    req.url = urlObject.absoluteString
+                    WXApi.send(req) { succeed in
+                        promise.resolve(succeed)
+                    }
+                } else {
+                    promise.reject(Exception(name: "ERR_INVALID_URL", description: "Please provide a valid url string"))
+                }
+            } else {
+                promise.reject(apiNotRegisteredException)
+            }
+        }
+        
     }
 }
 
