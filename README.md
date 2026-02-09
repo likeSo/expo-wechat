@@ -85,7 +85,8 @@ iOS需要配置通用链接和URL Scheme。安卓上需要配置混淆规则。�
 }
 ```
 
-请注意，由于包含了自定义的原生代码，无法在expo go中直接使用。你应该使用`npx expo run:android`或者`npx expo run:ios`，编译原生app。详情参见官方[DevClient文档](https://docs.expo.dev/versions/latest/sdk/dev-client/)。
+完成了上面的配置后，请务必执行`npx expo prebuild`，将这些配置项同步到原生项目中。<br />
+首次安装后，需要使用`npx expo run:ios`或`npx expo run:android`命令编译项目，不支持在expo go中使用。
 
 
 # 📝 初始化
