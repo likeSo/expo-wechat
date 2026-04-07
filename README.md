@@ -700,10 +700,15 @@ const shareToWeChat = async () => {
 > 微信授权结束后，会通过URL Scheme和通用链接来回到你的应用，并把授权结果带在路径上作为参数。比如`/wxauth/wx1234567890/oauth`
 > 如果你使用了expo-router，或者配置好了React Navigation的deep linking，那么导航器会尝试跳转到这个URL对应的路由下，由于路由不存在，就会显示404页面。
 
-#### 解决方案1
-既然这个问题产生的原因其实就是微信打开你的app的链接和你准备接收回调的链接没有“对准”，那么解决方案就是你想办法让它俩对准即可。在通用链接上和路由配置上想想办法。
+#### ✅ 自动解决方案（推荐）
+本插件已内置了解决方案，会自动拦截微信 Universal Link 回调，阻止 expo-router 处理，避免跳转到 404 页面。
 
-#### 解决方案2
+插件会自动检测包含 `/wx[a-zA-Z0-9]{16}/` 模式的 URL，确保只有 WeChat SDK 处理回调，无需任何手动配置。
+
+#### 替代方案1：手动对齐链接
+既然这个问题产生的原因其实就是微信打开你的app的链接和你准备接收回调的链接没有”对准”，那么解决方案就是你想办法让它俩对准即可。在通用链接上和路由配置上想想办法。
+
+#### 替代方案2：expo-router 拦截
 expo-router提供了一个API，可以让你拦截所有deep link，并手动控制是否处理。详见[Customizing links](https://docs.expo.dev/router/advanced/native-intent/#rewrite-incoming-native-deep-links)。
 简单来说，你需要新建一个`+native-intent.tsx`文件，按照文档导出一个函数，并根据条件，重定向到你的登录页面即可。
 
