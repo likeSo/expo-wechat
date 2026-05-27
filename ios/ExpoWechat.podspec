@@ -19,14 +19,20 @@ Pod::Spec.new do |s|
   s.static_framework = true
 
   s.dependency 'ExpoModulesCore'
-
-  s.dependency 'WechatOpenSDK-XCFramework','~> 2.0.5'
+  if ENV['EXPO_WECHAT_ENABLE_PAY'] == '1'
+    s.dependency 'WechatOpenSDK-XCFramework', '~> 2.0.5'
   
-#  s.dependency 'WXLibSwift/NoPay'
+    swift_conditions = '$(inherited) EXPO_WECHAT_ENABLE_PAY'
+  else
+    s.dependency 'OpenWeChatSDKNoPay', '~> 2.0.5'
+  
+    swift_conditions = '$(inherited)'
+  end
   
   # Swift/Objective-C compatibility
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',
+    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => swift_conditions
   }
 
   s.source_files = "**/*.{h,m,mm,swift,hpp,cpp}"

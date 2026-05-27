@@ -1,6 +1,7 @@
 package expo.modules.wechat
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
@@ -555,18 +556,34 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
 
         AsyncFunction("pay") { options: PayOptions, promise: Promise ->
             if (api != null) {
-                val req = PayReq()
-                req.appId = wxAppId
-                req.partnerId = options.partnerId
-                req.prepayId = options.prepayId
-                req.nonceStr = options.nonceStr
-                req.timeStamp = options.timeStamp.toString()
-                req.sign = options.sign
-                req.packageValue = options.`package`
-                req.extData = options.extraData
+                val context = appContext.reactContext
+                val packageName = context?.packageName.toString()
+                val applicationInfo = context?.packageManager?.getApplicationInfo(packageName,
+                    PackageManager.GET_META_DATA)
+                val enablePay = applicationInfo?.metaData?.getBoolean("EXPO_WECHAT_ENABLE_PAY", true) ?: true
 
-                api?.sendReq(req) { p0 ->
-                    promise.resolve(p0)
+                if (enablePay) {
+                    val req = PayReq()
+                    req.appId = wxAppId
+                    req.partnerId = options.partnerId
+                    req.prepayId = options.prepayId
+                    req.nonceStr = options.nonceStr
+                    req.timeStamp = options.timeStamp.toString()
+                    req.sign = options.sign
+                    req.packageValue = options.`package`
+                    req.extData = options.extraData
+
+                    api?.sendReq(req) { p0 ->
+                        promise.resolve(p0)
+                    }
+                } else {
+                    promise.reject(
+                        CodedException(
+                            "ERR_NO_PAYMENT_FEATURE",
+                            "You must set `enablePay = true` in `app.json` first. Otherwise, you cannot use payment features.",
+                            null
+                        )
+                    )
                 }
             } else {
                 promise.reject(apiNotRegisteredException)
