@@ -4,6 +4,7 @@ require File.join(File.dirname(`node --print "require.resolve('react-native/pack
 require 'json'
 podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
 
+ENV['EXPO_WECHAT_ENABLE_PAY'] = '0'
 ENV['RCT_NEW_ARCH_ENABLED'] = '0' if podfile_properties['newArchEnabled'] == 'false'
 ENV['EX_DEV_CLIENT_NETWORK_INSPECTOR'] = podfile_properties['EX_DEV_CLIENT_NETWORK_INSPECTOR']
 
@@ -49,6 +50,22 @@ target 'expowechatexample' do
       :mac_catalyst_enabled => false,
       :ccache_enabled => podfile_properties['apple.ccacheEnabled'] == 'true',
     )
+    
+    fmt_base = File.join(installer.sandbox.root, 'fmt', 'include', 'fmt', 'base.h')
+
+          if File.exist?(fmt_base)
+          content = File.read(fmt_base)
+          unless content.include?('Xcode 26 workaround')
+            patched = content.gsub(
+              /^(#elif defined\(__cpp_consteval\)\n#  define FMT_USE_CONSTEVAL) 1/,
+              "// Xcode 26 workaround: disable consteval\n\\1 0"
+            )
+            if patched != content
+              File.chmod(0644, fmt_base)
+              File.write(fmt_base, patched)
+            end
+          end
+        end
 
     # This is necessary for Xcode 14, because it signs resource bundles by default
     # when building for devices.

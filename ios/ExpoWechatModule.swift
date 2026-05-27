@@ -489,6 +489,7 @@ public class ExpoWechatModule: Module {
         
         AsyncFunction("pay") { (options: PayOptions, promise: Promise) in
             if (isApiRegistered) {
+#if EXPO_WECHAT_ENABLE_PAY
                 let req = PayReq()
                 
                 req.partnerId = options.partnerId
@@ -502,6 +503,9 @@ public class ExpoWechatModule: Module {
                 WXApi.send(req) { succeed in
                     promise.resolve(succeed)
                 }
+#else
+                promise.reject(Exception(name: "WeChat Pay does not enabled.", description: "You must set `enablePay = true` in `app.json` first. Otherwise, you cannot use payment features.", code: "ERR_NO_PAYMENT_FEATURE"))
+#endif
             } else {
                 promise.reject(apiNotRegisteredException)
             }

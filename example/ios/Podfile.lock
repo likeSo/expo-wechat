@@ -9,7 +9,7 @@ PODS:
   - EXJSONUtils (0.15.0)
   - EXManifests (0.16.6):
     - ExpoModulesCore
-  - Expo (53.0.25):
+  - Expo (53.0.27):
     - DoubleConversion
     - ExpoModulesCore
     - glog
@@ -306,9 +306,9 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - ExpoWechat (0.2.3):
+  - ExpoWechat (0.2.6):
     - ExpoModulesCore
-    - WechatOpenSDK-XCFramework (~> 2.0.5)
+    - OpenWeChatSDKNoPay (~> 2.0.5)
   - EXUpdatesInterface (1.1.0):
     - ExpoModulesCore
   - fast_float (6.1.4)
@@ -318,6 +318,7 @@ PODS:
   - hermes-engine (0.79.6):
     - hermes-engine/Pre-built (= 0.79.6)
   - hermes-engine/Pre-built (0.79.6)
+  - OpenWeChatSDKNoPay (2.0.5)
   - RCT-Folly (2024.11.18.00):
     - boost
     - DoubleConversion
@@ -1965,7 +1966,6 @@ PODS:
     - React-perflogger (= 0.79.6)
     - React-utils (= 0.79.6)
   - SocketRocket (0.7.1)
-  - WechatOpenSDK-XCFramework (2.0.5)
   - Yoga (0.0.0)
 
 DEPENDENCIES:
@@ -2061,8 +2061,8 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - OpenWeChatSDKNoPay
     - SocketRocket
-    - WechatOpenSDK-XCFramework
 
 EXTERNAL SOURCES:
   boost:
@@ -2248,7 +2248,7 @@ SPEC CHECKSUMS:
   EXImageLoader: 4d3d3284141f1a45006cc4d0844061c182daf7ee
   EXJSONUtils: 1d3e4590438c3ee593684186007028a14b3686cd
   EXManifests: 691a779b04e4f2c96da46fb9bef4f86174fefcb5
-  Expo: a9aaba7e05fb1445c5605b2b1be1904efa2aaaff
+  Expo: 7e07803ccc34cdf144a0d51cc2684a60628b6593
   expo-dev-client: 9b1e78baf0dd87b005f035d180bbb07c05917fad
   expo-dev-launcher: 35dc0269b5fc1f628abc00e08e5a969e7809eff4
   expo-dev-menu: 0771fa9c5c405e07aa15e55a699b8a4a984ea77a
@@ -2259,13 +2259,14 @@ SPEC CHECKSUMS:
   ExpoImagePicker: 0963da31800c906e01c03e25d7c849f16ebf02a2
   ExpoKeepAwake: bf0811570c8da182bfb879169437d4de298376e7
   ExpoModulesCore: 00a1b5c73248465bd0b93f59f8538c4573dac579
-  ExpoWechat: 5203714b4e80809792858a59a9303626b07eab03
+  ExpoWechat: 76f25a06c4f3113ebeeb0ba29cface513d11a861
   EXUpdatesInterface: 7ff005b7af94ee63fa452ea7bb95d7a8ff40277a
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
   FBLazyVector: 07309209b7b914451b8f822544a18e2a0a85afff
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   hermes-engine: 44bb6fe76a6eb400d3a992e2d0b21946ae999fa9
+  OpenWeChatSDKNoPay: a391d2a7c0d4db1bdc870f885bd4cba99b64f243
   RCT-Folly: e78785aa9ba2ed998ea4151e314036f6c49e6d82
   RCTDeprecation: 9bc64754b40b86fa5e32f293ab3ea8eea2248339
   RCTRequired: ee36c1ce9a5e65a3f629c13f38a85308eb8eebda
@@ -2329,9 +2330,8 @@ SPEC CHECKSUMS:
   ReactCodegen: 06cf663b23a161f42a2e14087269753f422885c0
   ReactCommon: 44c86ec3ace664c0f33b7a2ac89aced8304ef25e
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
-  WechatOpenSDK-XCFramework: ff342ae616bb86df3d236aca38059dfd4bc4a949
   Yoga: dc7c21200195acacb62fa920c588e7c2106de45e
 
-PODFILE CHECKSUM: 5b32907b096d81603ff2d4698be6863e01f51d37
+PODFILE CHECKSUM: f3ba975c19aedfeff4454ca0577596ce96f2c117
 
 COCOAPODS: 1.16.2

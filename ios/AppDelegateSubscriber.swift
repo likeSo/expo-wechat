@@ -50,12 +50,6 @@ public class AppDelegateSubscriber: ExpoAppDelegateSubscriber, WXApiDelegate {
             payload["country"] = authResp.country
             ExpoWechatModule.moduleInstance?.sendEvent("onAuthResult",
                                                        payload)
-        } else if let payResp = resp as? PayResp {
-            payload["prepayId"] = nil
-            payload["returnKey"] = payResp.returnKey
-            payload["extraInfo"] = nil
-            ExpoWechatModule.moduleInstance?.sendEvent("onPayResult",
-                                                       payload)
         } else if let launchMiniProgramResp = resp as? WXLaunchMiniProgramResp {
             payload["extraInfo"] = launchMiniProgramResp.extMsg
             ExpoWechatModule.moduleInstance?.sendEvent("onLaunchMiniProgramResult", payload)
@@ -66,5 +60,14 @@ public class AppDelegateSubscriber: ExpoAppDelegateSubscriber, WXApiDelegate {
         } else if let chooseInvoiceResp = resp as? WXChooseInvoiceResp {
             
         }
+#if EXPO_WECHAT_ENABLE_PAY
+        if let payResp = resp as? PayResp {
+            payload["prepayId"] = nil
+            payload["returnKey"] = payResp.returnKey
+            payload["extraInfo"] = nil
+            ExpoWechatModule.moduleInstance?.sendEvent("onPayResult",
+                                                       payload)
+        }
+#endif
     }
 }
