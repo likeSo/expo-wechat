@@ -2,14 +2,13 @@ import {
   AndroidConfig,
   ConfigPlugin,
   withAndroidManifest,
-  withAppBuildGradle,
   withInfoPlist,
   withPodfile,
 } from "expo/config-plugins";
 
-const withExpoWechat: ConfigPlugin<{ enablePay?: boolean }> = (
+const withExpoWechat: ConfigPlugin<{ enablePay?: boolean } | void> = (
   config,
-  { enablePay = true },
+  props,
 ) => {
   /// 往 Info.plist 中添加 Wechat 相关的 URL schemes
   config = withInfoPlist(config, (config) => {
@@ -24,6 +23,8 @@ const withExpoWechat: ConfigPlugin<{ enablePay?: boolean }> = (
     config.modResults.LSApplicationQueriesSchemes = queriesSchemes;
     return config;
   });
+
+  const enablePay = props?.enablePay ?? true;
 
   /// 往 Podfile 中添加 Wechat 相关的环境变量
   config = withPodfile(config, (config) => {
