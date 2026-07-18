@@ -682,7 +682,7 @@ const shareToWeChat = async () => {
 - 启动之前，请在`.env`文件内配置微信AppId和Key，去`app.json`文件内配置scheme和associatedDomains，切记确保与微信后台配置的一致。
 
 # ☎️ 联系方式
-本框架积极维护，如有任何问题，欢迎提交issue或者PR。也欢迎进群交流：682911244。
+本框架积极维护，如有任何问题，欢迎提交issue或者PR。也欢迎进群交流：QQ群：682911244、[电报群](https://t.me/+1HSJX4o_TU42ZTk1)
 
 
 # 🗺️ 线路图
