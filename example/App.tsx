@@ -1,6 +1,5 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { useEvent } from "expo";
-import ExpoWechat from "expo-wechat";
+import React, { useState, useCallback } from "react";
+import ExpoWechat, { useDebugLogger, useWeChatLogin} from "expo-wechat";
 import {
   Button,
   ScrollView,
@@ -21,19 +20,13 @@ export default function App() {
 
   const [miniProgramIdToLaunch, setMiniProgramIdToLaunch] = useState("");
 
-  const onAuthResult = useEvent(ExpoWechat, "onAuthResult");
-  const logInfo = useEvent(ExpoWechat, "onLog");
   const wechatAppId = process.env.EXPO_PUBLIC_WECHAT_APP_ID;
   const universalLink = process.env.EXPO_PUBLIC_UNIVERSAL_LINK;
   const isParametersValid = Boolean(wechatAppId) && Boolean(universalLink);
 
-  /// 监听微信日志事件，打印到控制台
-  useEffect(() => {
-    if (logInfo) {
-      // logInfo.log是日志内容;
-      console.log(logInfo);
-    }
-  }, [logInfo]);
+  const { login, result: loginResult} = useWeChatLogin('snsapi_userinfo', '123')
+  useDebugLogger('verbose')
+
 
   const initializeSDK = useCallback(async () => {
     if (!isParametersValid) {
@@ -47,7 +40,7 @@ export default function App() {
     if (!initialized) {
       return;
     }
-    const result = await ExpoWechat.sendAuthRequest("snsapi_userinfo", "123");
+    const result = await login()
     console.log("Send auth request result:", result);
   }, [initialized]);
 
@@ -215,10 +208,6 @@ export default function App() {
           <Button title="初始化微信SDK" onPress={initializeSDK} />
         )}
         <Button
-          onPress={() => ExpoWechat.startLogByLevel("verbose")}
-          title="开启全部日志"
-        />
-        <Button
           onPress={() => ExpoWechat.checkUniversalLinkReady()}
           title="启动微信自检（iOS Only）"
         />
@@ -230,7 +219,7 @@ export default function App() {
         <Button title="点击登录" onPress={onWeChatLogin} />
         <Text>
           微信登陆结果：{"\n"}
-          {JSON.stringify(onAuthResult, null, 2)}
+          {JSON.stringify(loginResult, null, 2)}
         </Text>
       </Group>
       <Group title="分享文字">

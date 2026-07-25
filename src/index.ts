@@ -2,3 +2,6 @@
 // and on native platforms to ExpoWechatModule.ts
 export { default } from './ExpoWechatModule';
 export * from  './ExpoWechat.types';
+
+// Export hooks
+export * from './hooks';
