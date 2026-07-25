@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { LogLevel, LogPayload } from '../ExpoWechat.types';
 import ExpoWechatModule from '../ExpoWechatModule';
 
