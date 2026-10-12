@@ -1,6 +1,7 @@
 # expo-wechat
 
 ![npm](https://img.shields.io/npm/v/expo-wechat.svg)
+![npm downloads](https://img.shields.io/npm/dm/expo-wechat)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 React Native Expo版本的微信SDK。
