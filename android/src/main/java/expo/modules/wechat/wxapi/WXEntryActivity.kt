@@ -49,8 +49,10 @@ class WXEntryActivity : Activity(), IWXAPIEventHandler {
             } else {
                 Log.e("ExpoWeChatModule", "Cannot open app: no launcher activity")
             }
+            // On a cold launch neither the module nor its JS listener exists yet; the module
+            // keeps the message until JS listens.
+            ExpoWechatModule.receiveShowMessage(req)
         }
-        ExpoWechatModule.moduleInstance?.onReq(req)
     }
 
     override fun onResp(resp: BaseResp?) {
