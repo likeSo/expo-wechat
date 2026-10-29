@@ -9,7 +9,6 @@ import android.util.Log
 import android.util.Patterns
 import android.util.Property
 import androidx.core.content.FileProvider
-import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.diffdev.DiffDevOAuthFactory
 import com.tencent.mm.opensdk.diffdev.OAuthErrCode
 import com.tencent.mm.opensdk.diffdev.OAuthListener
@@ -64,6 +63,40 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
         fun sendEventToJS(eventName: String, params: Map<String, Any?>) {
             moduleInstance?.sendEvent(eventName, params)
         }
+
+        // WeChat can launch the app before React Native creates this module, and JS adds its
+        // listener later still. A message that arrives while JS has no listener for
+        // onShowMessageFromWeChat waits here, in arrival order, until the first listener is added
+        // (in this or a later module of the same process), and is then sent once. The lock orders
+        // receiving (main thread) against starting and stopping observation (the module queue), so
+        // each message is either sent or queued, never both.
+        private val showMessageLock = Any()
+        private val pendingShowMessages = ArrayDeque<Map<String, Any?>>()
+        private var showMessageObserver: ExpoWechatModule? = null
+
+        internal fun receiveShowMessage(req: ShowMessageFromWX.Req) {
+            val message = req.message
+            val payload: Map<String, Any?> = mapOf(
+                "openId" to req.openId,
+                "transaction" to req.transaction,
+                "lang" to req.lang,
+                "country" to req.country,
+                // OpenSDK leaves mediaObject null when the message names no media object.
+                "mediaType" to (message.mediaObject?.type() ?: WXMediaMessage.IMediaObject.TYPE_UNKNOWN),
+                "title" to message.title,
+                "description" to message.description,
+                "extraInfo" to message.messageExt,
+                "mediaTag" to message.mediaTagName
+            )
+            synchronized(showMessageLock) {
+                val observer = showMessageObserver
+                if (observer != null) {
+                    observer.sendEvent("onShowMessageFromWeChat", payload)
+                } else {
+                    pendingShowMessages.addLast(payload)
+                }
+            }
+        }
     }
 
     var api: IWXAPI? = null;
@@ -91,10 +124,26 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
         }
 
         OnDestroy {
+            stopShowMessageDelivery()
             moduleInstance = null
             api = null
             wxAppId = null
             logLevel = null
+        }
+
+        // Expo calls this after JS has added the first listener for the event, so the listener
+        // already exists when the queued messages reach JS.
+        OnStartObserving("onShowMessageFromWeChat") {
+            synchronized(showMessageLock) {
+                showMessageObserver = this@ExpoWechatModule
+                while (pendingShowMessages.isNotEmpty()) {
+                    sendEvent("onShowMessageFromWeChat", pendingShowMessages.removeFirst())
+                }
+            }
+        }
+
+        OnStopObserving("onShowMessageFromWeChat") {
+            stopShowMessageDelivery()
         }
 
         Property("isRegistered") {
@@ -623,22 +672,17 @@ class ExpoWechatModule : Module(), IWXAPIEventHandler {
 
 
     override fun onReq(p0: BaseReq?) {
-        if (p0?.type == ConstantsAPI.COMMAND_SHOWMESSAGE_FROM_WX) {
-            val weChatMessage = p0 as ShowMessageFromWX.Req;
-            sendEventToJS(
-                "onShowMessageFromWeChat",
-                mapOf(
-                    "openId" to p0.openId,
-                    "transaction" to p0.transaction,
-                    "lang" to weChatMessage.lang,
-                    "country" to weChatMessage.country,
-                    "mediaType" to weChatMessage.message.mediaObject.type(),
-                    "title" to weChatMessage.message.title,
-                    "description" to weChatMessage.message.description,
-                    "extraInfo" to weChatMessage.message.messageExt,
-                    "mediaTag" to weChatMessage.message.mediaTagName
-                )
-            )
+        if (p0 is ShowMessageFromWX.Req) {
+            receiveShowMessage(p0)
+        }
+    }
+
+    private fun stopShowMessageDelivery() {
+        synchronized(showMessageLock) {
+            // A module destroyed after its replacement started observing must not stop delivery to it.
+            if (showMessageObserver === this) {
+                showMessageObserver = null
+            }
         }
     }
 
