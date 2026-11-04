@@ -2,20 +2,44 @@ import ExpoModulesCore
 import WechatOpenSDK
 
 public class AppDelegateSubscriber: ExpoAppDelegateSubscriber, WXApiDelegate {
+    // WeChat can launch the app before JS registers the SDK, and the app only registers it once the
+    // privacy policy is accepted. What opens the app until then waits here, in arrival order, and
+    // goes to the SDK when JS registers it. It is not also tried at once, so a message reaches onReq
+    // once, whatever the SDK does while unregistered. Main thread only.
+    private static var isSDKRegistered = false
+    private static var pendingOpens: [() -> Void] = []
+
+    static func sdkDidRegister() {
+        DispatchQueue.main.async {
+            isSDKRegistered = true
+            let opens = pendingOpens
+            pendingOpens = []
+            opens.forEach { $0() }
+        }
+    }
+
+    private func openOnceRegistered(_ open: @escaping () -> Bool) -> Bool {
+        if Self.isSDKRegistered {
+            return open()
+        }
+        Self.pendingOpens.append { _ = open() }
+        return false
+    }
+
     public func application(_ application: UIApplication, handleOpen url: URL) -> Bool {
-        return WXApi.handleOpen(url, delegate: self)
+        return openOnceRegistered { WXApi.handleOpen(url, delegate: self) }
     }
     
     public func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
-        return WXApi.handleOpen(url, delegate: self)
+        return openOnceRegistered { WXApi.handleOpen(url, delegate: self) }
     }
     
     public func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        return WXApi.handleOpen(url, delegate: self)
+        return openOnceRegistered { WXApi.handleOpen(url, delegate: self) }
     }
     
     public func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([any UIUserActivityRestoring]?) -> Void) -> Bool {
-        return WXApi.handleOpenUniversalLink(userActivity, delegate: self)
+        return openOnceRegistered { WXApi.handleOpenUniversalLink(userActivity, delegate: self) }
     }
     
     // MARK: WXApiDelegate
@@ -31,8 +55,8 @@ public class AppDelegateSubscriber: ExpoAppDelegateSubscriber, WXApiDelegate {
                 "extraInfo": launchFromWeChatReq.message.messageExt,
                 "mediaTag": launchFromWeChatReq.message.mediaTagName,
             ]
-            ExpoWechatModule.moduleInstance?.sendEvent("onShowMessageFromWeChat",
-                                                       payload)
+            // On a cold launch JS has no listener yet; the module keeps the message until it does.
+            ExpoWechatModule.receiveShowMessage(payload)
         }
     }
     
