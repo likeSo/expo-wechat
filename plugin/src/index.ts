@@ -26,17 +26,22 @@ const withExpoWechat: ConfigPlugin<{ enablePay?: boolean } | void> = (
 
   const enablePay = props?.enablePay ?? true;
 
+  const envLine = `ENV['EXPO_WECHAT_ENABLE_PAY'] = '${enablePay ? "1" : "0"}'`;
+
   /// 往 Podfile 中添加 Wechat 相关的环境变量
   config = withPodfile(config, (config) => {
     const podfile = config.modResults.contents;
-    if (podfile.includes(`ENV['EXPO_WECHAT_ENABLE_PAY']`)) {
-      return config;
+    if (/^ENV\['EXPO_WECHAT_ENABLE_PAY'\]/m.test(podfile)) {
+      config.modResults.contents = podfile.replace(
+        /^ENV\['EXPO_WECHAT_ENABLE_PAY'\].*$/m,
+        envLine,
+      );
+    } else {
+      config.modResults.contents = podfile.replace(
+        /^[ \t]*platform[ \t]+:ios.*$\n/m,
+        envLine + "\n$&",
+      );
     }
-
-    config.modResults.contents = podfile.replace(
-      /ENV\['RCT_NEW_ARCH_ENABLED'\].*\n/,
-      `ENV['EXPO_WECHAT_ENABLE_PAY'] = '${enablePay ? "1" : "0"}'\n$&`,
-    );
     return config;
   });
 
