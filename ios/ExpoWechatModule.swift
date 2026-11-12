@@ -7,6 +7,35 @@ let apiNotRegisteredException = Exception(name: "ApiNotRegisteredException", des
 public class ExpoWechatModule: Module {
     
     static weak var moduleInstance: ExpoWechatModule?
+
+    // An event nobody listens to is dropped, and WeChat can launch the app before JS adds its
+    // listener. A message that arrives while JS has no listener for onShowMessageFromWeChat waits
+    // here, in arrival order, until the first listener is added (in this or a later module of the
+    // same process), and is then sent once. The lock orders receiving against starting and stopping
+    // observation, so each message is either sent or queued, never both.
+    private static let showMessageLock = NSLock()
+    private static var pendingShowMessages: [[String: Any?]] = []
+    private static weak var showMessageObserver: ExpoWechatModule?
+
+    static func receiveShowMessage(_ payload: [String: Any?]) {
+        showMessageLock.lock()
+        defer { showMessageLock.unlock() }
+        if let observer = showMessageObserver {
+            observer.sendEvent("onShowMessageFromWeChat", payload)
+        } else {
+            pendingShowMessages.append(payload)
+        }
+    }
+
+    private func stopShowMessageDelivery() {
+        Self.showMessageLock.lock()
+        defer { Self.showMessageLock.unlock() }
+        // A module destroyed after its replacement started observing must not stop delivery to it.
+        if Self.showMessageObserver === self {
+            Self.showMessageObserver = nil
+        }
+    }
+
     private var isApiRegistered = false
     private var logLevel: LogLevel?
     fileprivate var authSDK: WechatAuthSDK?
@@ -33,6 +62,7 @@ public class ExpoWechatModule: Module {
         }
         
         OnDestroy {
+            self.stopShowMessageDelivery()
             Self.moduleInstance = nil
             
             self.authSDK?.stopAuth()
@@ -40,6 +70,21 @@ public class ExpoWechatModule: Module {
             self.authSDK = nil
         }
         
+        // Expo calls this after JS has added the first listener for the event, so the listener
+        // already exists when the queued messages reach JS.
+        OnStartObserving("onShowMessageFromWeChat") {
+            Self.showMessageLock.lock()
+            defer { Self.showMessageLock.unlock() }
+            Self.showMessageObserver = self
+            let messages = Self.pendingShowMessages
+            Self.pendingShowMessages = []
+            messages.forEach { self.sendEvent("onShowMessageFromWeChat", $0) }
+        }
+
+        OnStopObserving("onShowMessageFromWeChat") {
+            self.stopShowMessageDelivery()
+        }
+
         Property("isRegistered") {
             return isApiRegistered
         }
@@ -63,6 +108,9 @@ public class ExpoWechatModule: Module {
         AsyncFunction("registerApp") { (appId: String, universalLink: String) in
             let result = WXApi.registerApp(appId, universalLink: universalLink)
             isApiRegistered = result
+            if result {
+                AppDelegateSubscriber.sdkDidRegister()
+            }
             return result
         }
         
